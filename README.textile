@@ -1,0 +1,3 @@
+h1. AS3-Mixins
+
+This is a concept to provide mixins to the as3 language easily and robustly without to much hassle.
