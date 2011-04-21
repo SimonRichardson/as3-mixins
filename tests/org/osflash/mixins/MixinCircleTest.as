@@ -1,6 +1,5 @@
 package org.osflash.mixins
 {
-	import asunit.asserts.assertNotNull;
 	import asunit.framework.IAsync;
 
 	import org.osflash.mixins.support.ICircle;
@@ -8,10 +7,11 @@ package org.osflash.mixins
 	import org.osflash.mixins.support.ISize;
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.SizeImpl;
+	import org.osflash.mixins.support.observers.MixinCircleTestObservers;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class MixinCircleTest implements IMixinObserver
+	public class MixinCircleTest
 	{
 		
 		[Inject]
@@ -35,21 +35,10 @@ package org.osflash.mixins
 		[Test]
 		public function create_circle_mixin_and_verify_creation() : void
 		{
-			mixin.addObserver(this);
+			mixin.addObserver(new MixinCircleTestObservers());
 			mixin.add(IPosition, PositionImpl);
 			mixin.add(ISize, SizeImpl);
 			mixin.define(ICircle);
-		}
-				
-		public function mixinCompletedSignal(mixin : IMixin) : void
-		{
-			const circle : ICircle = mixin.create(ICircle);
-			
-			assertNotNull('ICircle implementation is not null', circle);
-		}
-
-		public function mixinErrorSiginal(mixin : IMixin) : void
-		{
 		}
 	}
 }
