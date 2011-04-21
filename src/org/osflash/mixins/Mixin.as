@@ -8,12 +8,12 @@ package org.osflash.mixins
 	{
 		
 		/**
-		 * 
+		 * @private
 		 */
 		private var _completedSignal : ISignal;
 		
 		/**
-		 * 
+		 * @private
 		 */
 		private var _errorSignal : ISignal;
 		
@@ -35,7 +35,7 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function remove(descriptor : Class) : IMixinBinding
+		public function remove(descriptor : Class, implementation : Class) : IMixinBinding
 		{
 			return null;
 		}
@@ -82,7 +82,5 @@ package org.osflash.mixins
 			_errorSignal.remove(observer.mixinErrorSiginal);
 			_completedSignal.remove(observer.mixinCompletedSignal);
 		}
-
-		
 	}
 }

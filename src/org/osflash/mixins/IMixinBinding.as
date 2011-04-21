@@ -9,6 +9,13 @@ package org.osflash.mixins
 		/**
 		 * 
 		 */
+		function get descriptor() : Class;
+		
+		function set descriptor(value :  Class) : void;
+		
+		/**
+		 * 
+		 */
 		function get implementation() : Class;
 		
 		function set implementation(value :  Class) : void;
