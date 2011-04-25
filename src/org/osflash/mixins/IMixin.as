@@ -38,7 +38,7 @@ package org.osflash.mixins
 		 * @param implementation The value for the mixin binding.
 		 * @return a IMixinBinding, which contains the descriptor and implementation as parameters.
 		 */
-		function remove(descriptor : Class, implementation : Class) : IMixinBinding;
+		function remove(descriptor : Class) : IMixinBinding;
 		
 		/**
 		 * Unsubscribes all observers and implementations from the mixin.

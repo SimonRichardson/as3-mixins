@@ -2,7 +2,6 @@ package org.osflash.mixins
 {
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
-
 	import flash.errors.IllegalOperationError;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -49,6 +48,7 @@ package org.osflash.mixins
 		 */
 		public function define(implementation : Class) : void
 		{
+			
 		}
 		
 		/**
@@ -56,14 +56,19 @@ package org.osflash.mixins
 		 */
 		public function create(definitive : Class) : void
 		{
+			
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function remove(descriptor : Class, implementation : Class) : IMixinBinding
+		public function remove(descriptor : Class) : IMixinBinding
 		{
-			return null;
+			const binding : IMixinBinding = bindings.find(descriptor);
+			if (!binding) return null;
+			
+			bindings = bindings.filterNot(descriptor);
+			return binding;
 		}
 		
 		/**
@@ -71,6 +76,8 @@ package org.osflash.mixins
 		 */
 		public function removeAll() : void
 		{
+			bindings = MixinBindingList.NIL;
+			
 			_completedSignal.removeAll();
 			_errorSignal.removeAll();
 		}
