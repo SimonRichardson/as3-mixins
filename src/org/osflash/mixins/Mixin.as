@@ -91,6 +91,10 @@ package org.osflash.mixins
 		{
 			bindings = MixinBindingList.NIL;
 			
+			for(var definition : Class in definitions)
+			{
+				delete definitions[definition];
+			}
 			
 			_completedSignal.removeAll();
 			_errorSignal.removeAll();
