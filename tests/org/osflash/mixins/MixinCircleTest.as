@@ -35,7 +35,11 @@ package org.osflash.mixins
 		[Test]
 		public function create_circle_mixin_and_verify_creation() : void
 		{
-			mixin.addObserver(new MixinCircleTestObservers());
+			const observer : MixinCircleTestObservers = new MixinCircleTestObservers();
+			
+			mixin.completedSignal.add(observer.mixinCompletedSignal);
+			mixin.errorSignal.add(observer.mixinErrorSiginal);
+			
 			mixin.add(IPosition, PositionImpl);
 			mixin.add(ISize, SizeImpl);
 			mixin.define(ICircle);

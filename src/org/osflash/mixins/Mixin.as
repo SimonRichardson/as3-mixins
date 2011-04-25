@@ -68,19 +68,11 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function addObserver(observer : IMixinObserver) : void
-		{
-			_errorSignal.add(observer.mixinErrorSiginal);
-			_completedSignal.add(observer.mixinCompletedSignal);
-		}
+		public function get completedSignal() : ISignal	{ return _completedSignal; }
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function removeObserver(observer : IMixinObserver) : void
-		{
-			_errorSignal.remove(observer.mixinErrorSiginal);
-			_completedSignal.remove(observer.mixinCompletedSignal);
-		}
+		public function get errorSignal() : ISignal	{ return _errorSignal; }
 	}
 }

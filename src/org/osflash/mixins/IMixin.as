@@ -1,5 +1,6 @@
 package org.osflash.mixins
 {
+	import org.osflash.signals.ISignal;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -32,18 +33,6 @@ package org.osflash.mixins
 		function create(definitive : Class) : *;
 		
 		/**
-		 * Add observer to know when the class is created or not.
-		 * @param observer A IMixinObserver to know if when a mixin is available.
-		 */
-		function addObserver(observer : IMixinObserver) : void;
-		
-		/**
-		 * Remove an observer from the mixin to prevent listening anymore.
-		 * @param observer A IMixinObserver used to remove it from the mixin.
-		 */
-		function removeObserver(observer : IMixinObserver) : void;
-		
-		/**
 		 * Unsubscribes a descriptor and implemenation from the mixin.
 		 * @param descriptor The key for the mixin binding.
 		 * @param implementation The value for the mixin binding.
@@ -55,5 +44,15 @@ package org.osflash.mixins
 		 * Unsubscribes all observers and implementations from the mixin.
 		 */
 		function removeAll() : void;
+		
+		/**
+		 * Add a signal to know when the class has been created.
+		 */
+		function get completedSignal() : ISignal;
+		
+		/**
+		 * Add a signal to know when the class has been not be succesfully created.
+		 */
+		function get errorSignal() : ISignal;
 	}
 }
