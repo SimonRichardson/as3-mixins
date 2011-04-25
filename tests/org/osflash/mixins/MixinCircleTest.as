@@ -1,5 +1,8 @@
 package org.osflash.mixins
 {
+	import asunit.asserts.assertEquals;
+	import asunit.asserts.assertNotNull;
+	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
 
 	import org.osflash.mixins.support.ICircle;
@@ -7,7 +10,6 @@ package org.osflash.mixins
 	import org.osflash.mixins.support.ISize;
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.SizeImpl;
-	import org.osflash.mixins.support.observers.MixinCircleTestObservers;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -35,14 +37,25 @@ package org.osflash.mixins
 		[Test]
 		public function create_circle_mixin_and_verify_creation() : void
 		{
-			const observer : MixinCircleTestObservers = new MixinCircleTestObservers();
-			
-			mixin.completedSignal.add(observer.mixinCompletedSignal);
-			mixin.errorSignal.add(observer.mixinErrorSiginal);
+			mixin.completedSignal.add(handleCompletedSignal);
+			mixin.errorSignal.add(handleErrorSiginal);
 			
 			mixin.add(IPosition, PositionImpl);
 			mixin.add(ISize, SizeImpl);
 			mixin.define(ICircle);
+		}
+
+		private function handleErrorSiginal(mixin : IMixin, mixinError : MixinError) : void
+		{
+			fail('Failed to create mixin (' + mixin + ") with error " + mixinError);
+		}
+
+		private function handleCompletedSignal(mixin : IMixin) : void
+		{
+			const impl : ICircle = mixin.create(ICircle);
+			
+			assertNotNull('ICirlce implementation is not null', impl);
+			assertEquals('Valid creation of ICircle implementation', impl);
 		}
 	}
 }
