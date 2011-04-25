@@ -1,9 +1,11 @@
 package org.osflash.mixins
 {
-	import flash.utils.Dictionary;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
+
 	import flash.errors.IllegalOperationError;
+	import flash.utils.Dictionary;
+	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -69,7 +71,12 @@ package org.osflash.mixins
 		 */
 		public function create(definitive : Class) : *
 		{
-			
+			const definition : Class = definitions[definitive];
+			if (definition == null)
+			{
+				throw new ArgumentError("A class for " 
+					+ getQualifiedClassName(definitive) + " has not been defined yet.");
+			}
 		}
 		
 		/**
