@@ -1,5 +1,6 @@
 package org.osflash.mixins
 {
+	import flash.utils.Dictionary;
 	import org.osflash.signals.ISignal;
 	import org.osflash.signals.Signal;
 	import flash.errors.IllegalOperationError;
@@ -25,6 +26,11 @@ package org.osflash.mixins
 		protected var bindings : MixinBindingList = MixinBindingList.NIL;
 		
 		/**
+		 * @private
+		 */
+		protected var definitions : Dictionary = new Dictionary();
+		
+		/**
 		 * 
 		 */
 		public function Mixin()
@@ -48,13 +54,20 @@ package org.osflash.mixins
 		 */
 		public function define(implementation : Class) : void
 		{
+			if(null == implementation) throw new ArgumentError('Given implementation can not ' + 
+																					'be null');
 			
+			if(definitions[implementation]) throw new ArgumentError('You cannot define() the ' + 
+													'same implementation without removing the ' + 
+													'relationship first.');
+			
+			definitions[implementation] = true;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function create(definitive : Class) : void
+		public function create(definitive : Class) : *
 		{
 			
 		}
@@ -77,6 +90,7 @@ package org.osflash.mixins
 		public function removeAll() : void
 		{
 			bindings = MixinBindingList.NIL;
+			
 			
 			_completedSignal.removeAll();
 			_errorSignal.removeAll();
