@@ -81,12 +81,12 @@ package org.osflash.mixins.generator
 												[Instructions.GetLocal_0], // 'this'
 												[Instructions.ConstructSuper, argCount]
 												];
-						
-			for each(var interfaceType : Type in mixins) 
+			
+			for each(var interfaceType : Class in mixins) 
 			{
 				const proxyObjectType : Type = Type.getType(interfaceType);
 				const proxyPropertyName : QualifiedName = buildProxyPropName(	namespaze, 
-																				interfaceType
+																				proxyObjectType
 																				);
 				
 				instructions.push([Instructions.FindProperty, proxyPropertyName]);

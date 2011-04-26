@@ -18,6 +18,7 @@ package org.osflash.mixins
 	import flash.errors.IllegalOperationError;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
+	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -138,7 +139,12 @@ package org.osflash.mixins
 		 */
 		public function inject(applicationDomain : ApplicationDomain) : void
 		{
+			const log : * = getDefinitionByName("trace");
+			
 			const total : int = definitions.length;
+			
+			log("TOTAL " + total);
+		
 			for(var i : int = 0; i<total; i++)
 			{
 				const implementation : Class = definitions[i];
@@ -146,7 +152,7 @@ package org.osflash.mixins
 				const fullName : String = qname.ns.name.concat('::', qname.name);
 				const generatedClass : Class = applicationDomain.getDefinition(fullName) as Class;
 					
-				// Type.getType(generatedClass);
+				//Type.getType(generatedClass);
 				classes[implementation] = generatedClass;
 			}
 		}
@@ -223,13 +229,13 @@ package org.osflash.mixins
 		public function removeAll() : void
 		{
 			bindings = MixinBindingList.NIL;
-			
+			/*
 			var index : int = definitions.length;
 			while(--index > -1)
 			{
 				definitions.pop();
 			}
-			
+			*/
 			cleanup();
 		}
 		
@@ -325,12 +331,13 @@ package org.osflash.mixins
 			const interfaces : Array = base.getInterfaces();
 			const mixins : Dictionary = new Dictionary();
 			
-			for each (var type : Type in interfaces)
+			for each(var type : Type in interfaces)
 			{
 				const binding : IMixinBinding = bindings.find(type.classDefinition);
 				if(null != binding)
 				{
-					if(!binding.ignore) mixins[type] = binding.implementation;
+					if(!binding.ignore) 
+						mixins[type] = binding.implementation;
 				}
 				else
 				{
