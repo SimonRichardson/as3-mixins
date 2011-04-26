@@ -5,7 +5,10 @@ package org.osflash.mixins
 	import org.flemit.bytecode.IByteCodeLayout;
 	import org.flemit.bytecode.IByteCodeLayoutBuilder;
 	import org.flemit.bytecode.QualifiedName;
+	import org.flemit.reflection.ParameterInfo;
 	import org.flemit.reflection.Type;
+	import org.flemit.util.ClassUtility;
+	import org.flemit.util.MethodUtil;
 	import org.osflash.mixins.generator.MixinGenerationSignals;
 	import org.osflash.mixins.generator.MixinGenerator;
 	import org.osflash.mixins.generator.MixinLoaderGenerator;
@@ -146,16 +149,55 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function create(definitive : Class) : *
+		public function create(definitive : Class, args : Object = null) : *
 		{
-			const definition : Class = definitions[definitive];
+			const definition : Class = classes[definitive];
 			if (definition == null)
 			{
 				throw new ArgumentError("A class for " 
 					+ getQualifiedClassName(definitive) + " has not been defined yet.");
 			}
 			
+			const dynamicClass : DynamicClass = dynamicClasses[definitive];
+			const classType : Type = Type.getType(definition);
+			const params : Array = dynamicClass.constructor.parameters;
 			
+			const argumentValues : Array = [];
+			if(null != args)
+			{
+				const constructorArgCount : int = MethodUtil.getRequiredArgumentCount(
+																			classType.constructor);
+				
+				// Work out how many items in the args Object
+				var argsLength : int = 0;
+				var prop : String;
+				for(prop in args)
+				{
+					argsLength++;
+				}
+				
+				// Make sure they both add up.
+				if (argsLength != constructorArgCount)
+				{
+					throw new ArgumentError('Constructor expects at least ' + 
+																constructorArgCount + 'arguemnts');
+				}
+				
+				const total : int = params.length;
+				for (var i : int = 0; i < total;  i++)
+				{
+					const param : ParameterInfo = params[i];
+					const paramName : String = param.name;
+					
+					if (args.hasOwnProperty(paramName))
+						argumentValues.push(args[paramName]);
+					else if (!param.optional)
+						throw new ArgumentError('The argument map did not contain an entry for "' + 
+												paramName + '" and this parameter is not optional');
+				}
+			}
+			
+			return ClassUtility.createClass(definition, argumentValues);
 		}
 		
 		/**
