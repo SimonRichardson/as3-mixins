@@ -165,11 +165,7 @@ package org.osflash.mixins.generator
 																			);
 						
 						const classMethodBody : DynamicMethod = generateMethod(	definition, 
-																				dynamicClass, 
 																				classMethod, 
-																				null, 
-																				false, 
-																				classMethod.name, 
 																				MethodType.METHOD
 																				);
 						
@@ -204,11 +200,7 @@ package org.osflash.mixins.generator
 						if (property.canRead)
 						{
 							const getter : DynamicMethod = generateMethod(	definition, 
-																			dynamicClass, 
 																			classProperty.getMethod, 
-																			null, 
-																			false, 
-																			classProperty.name, 
 																			MethodType.PROPERTY_GET
 																			);
 							dynamicClass.addMethodBody(	classProperty.getMethod, getter);
@@ -217,11 +209,7 @@ package org.osflash.mixins.generator
 						if (property.canWrite)
 						{
 							const setter : DynamicMethod = generateMethod(	definition, 
-																			dynamicClass, 
 																			classProperty.setMethod, 
-																			null, 
-																			false, 
-																			classProperty.name, 
 																			MethodType.PROPERTY_SET
 																			);
 							dynamicClass.addMethodBody(classProperty.setMethod, setter);
@@ -240,11 +228,7 @@ package org.osflash.mixins.generator
 		 * @private
 		 */
 		protected function generateMethod(	type : Type, 
-											dynamicClass : DynamicClass, 
 											method : MethodInfo, 
-											baseMethod : MethodInfo, 
-											baseIsDelegate : Boolean, 
-											name : String, 
 											methodType : uint
 											) : DynamicMethod
 		{

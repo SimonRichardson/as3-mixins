@@ -11,11 +11,8 @@ package org.osflash.mixins
 	import org.osflash.mixins.generator.MixinLoaderGenerator;
 	import org.osflash.mixins.generator.MixinQualifiedName;
 	import org.osflash.signals.ISignal;
-	import org.osflash.signals.natives.NativeSignal;
 
-	import flash.display.Loader;
 	import flash.errors.IllegalOperationError;
-	import flash.events.Event;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
