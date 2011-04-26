@@ -1,6 +1,6 @@
 package org.osflash.mixins
 {
-	import org.osflash.signals.ISignal;
+	import org.osflash.mixins.generator.MixinGenerationSignals;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -26,6 +26,14 @@ package org.osflash.mixins
 		function define(implementation : Class) : void;
 		
 		/**
+		 * Generate the new mixins, a callback can be used to find out if the process was
+		 * created or not.
+		 * 
+		 * @return MixinGenerationSignals
+		 */
+		function generate() : MixinGenerationSignals;
+		
+		/**
 		 * Create a definitive concreate instance from implementations.
 		 * @param definitive A defined implementation you want to create as a concrete instance. 
 		 * @throws ArgumentError if implementation is <code>null</code>
@@ -45,14 +53,5 @@ package org.osflash.mixins
 		 */
 		function removeAll() : void;
 		
-		/**
-		 * Add a signal to know when the class has been created.
-		 */
-		function get completedSignal() : ISignal;
-		
-		/**
-		 * Add a signal to know when the class has been not be succesfully created.
-		 */
-		function get errorSignal() : ISignal;
 	}
 }

@@ -1,7 +1,10 @@
 package org.osflash.mixins
 {
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
+	import org.osflash.mixins.generator.MixinGenerator;
+	import org.flemit.bytecode.DynamicClass;
+	import org.flemit.bytecode.QualifiedName;
+	import org.flemit.reflection.Type;
+	import org.osflash.mixins.generator.MixinGenerationSignals;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.Dictionary;
@@ -12,15 +15,6 @@ package org.osflash.mixins
 	public class Mixin implements IMixin
 	{
 		
-		/**
-		 * @private
-		 */
-		private const _completedSignal : ISignal = new Signal(IMixin);
-		
-		/**
-		 * @private
-		 */
-		private const _errorSignal : ISignal = new Signal(IMixin, MixinError);
 		
 		/**
 		 * @private
@@ -30,7 +24,12 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
-		protected var definitions : Dictionary = new Dictionary();
+		protected const definitions : Dictionary = new Dictionary();
+		
+		/**
+		 * @private
+		 */
+		protected const mixinGenerator : MixinGenerator = new MixinGenerator();
 		
 		/**
 		 * 
@@ -64,8 +63,27 @@ package org.osflash.mixins
 													'relationship first.');
 			
 			definitions[implementation] = true;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function generate() : MixinGenerationSignals
+		{
+			const allDefinitions : Vector.<Class> = new Vector.<Class>();
 			
-			// TODO : fire off the generator here. 
+			for each(var definition : Class in definitions)
+			{
+				allDefinitions.push(definition);
+			}
+			
+			if (allDefinitions.length == 0)
+			{
+				throw new IllegalOperationError('No definition classes were defined. Use ' +
+												'define() to create mixins.');
+			}
+			
+			return prepareClasses(allDefinitions, createDynamicClass);
 		}
 		
 		/**
@@ -106,9 +124,6 @@ package org.osflash.mixins
 			{
 				delete definitions[definition];
 			}
-			
-			_completedSignal.removeAll();
-			_errorSignal.removeAll();
 		}
 		
 		/**
@@ -127,6 +142,9 @@ package org.osflash.mixins
 			return bindings.find(descriptor);
 		}
 		
+		/**
+		 * @private
+		 */
 		protected function registrationPossible(descriptor : Class,
 													implementation : Class) : Boolean
 		{
@@ -147,13 +165,38 @@ package org.osflash.mixins
 		}
 		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
-		public function get completedSignal() : ISignal	{ return _completedSignal; }
+		protected function prepareClasses(	classesToPrepare : Vector.<Class>, 
+											generator : Function
+										) : MixinGenerationSignals
+		{
+			return null;
+		}
 		
 		/**
-		 * @inheritDoc
+		 * @private
 		 */
-		public function get errorSignal() : ISignal	{ return _errorSignal; }
+		protected function createDynamicClass(name:QualifiedName, base:Type) : DynamicClass
+		{
+			const interfaces : Array = base.getInterfaces();
+			const mixins : Dictionary = new Dictionary();
+			
+			for each (var type : Type in interfaces)
+			{
+				const binding : IMixinBinding = bindings.find(type.classDefinition);
+				if(null != binding)
+				{
+					if(!binding.ignore) mixins[type] = binding.implementation;
+				}
+				else
+				{
+					throw new MixinError('Interface ' + type + ' defined on ' + base + 
+											'has not being defined'); 
+				}
+			}
+			
+			return mixinGenerator.generate(name, base, mixins);
+		}
 	}
 }

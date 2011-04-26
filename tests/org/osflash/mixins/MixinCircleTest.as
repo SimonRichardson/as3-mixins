@@ -4,12 +4,13 @@ package org.osflash.mixins
 	import asunit.asserts.assertNotNull;
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
-
+	import org.osflash.mixins.generator.MixinGenerationSignals;
 	import org.osflash.mixins.support.ICircle;
 	import org.osflash.mixins.support.IPosition;
 	import org.osflash.mixins.support.ISize;
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.SizeImpl;
+
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -37,12 +38,13 @@ package org.osflash.mixins
 		[Test]
 		public function create_circle_mixin_and_verify_creation() : void
 		{
-			mixin.completedSignal.add(handleCompletedSignal);
-			mixin.errorSignal.add(handleErrorSiginal);
-			
 			mixin.add(IPosition, PositionImpl);
 			mixin.add(ISize, SizeImpl);
 			mixin.define(ICircle);
+			
+			const signals : MixinGenerationSignals = mixin.generate();
+			signals.completedSignal.add(handleCompletedSignal);
+			signals.errorSignal.add(handleErrorSiginal);
 		}
 
 		private function handleErrorSiginal(mixin : IMixin, mixinError : MixinError) : void
