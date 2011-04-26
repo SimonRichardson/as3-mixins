@@ -22,7 +22,6 @@ package org.osflash.mixins
 	public class Mixin implements IMixin
 	{
 		
-		
 		/**
 		 * @private
 		 */
@@ -31,7 +30,7 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
-		protected const definitions : Dictionary = new Dictionary();
+		protected const definitions : Vector.<Class> = new Vector.<Class>();
 		
 		/**
 		 * @private
@@ -43,6 +42,11 @@ package org.osflash.mixins
 		 */
 		protected const classes : Dictionary = new Dictionary();
 		
+		/**
+		 * @private
+		 */		
+		protected const generatedNames : Dictionary = new Dictionary();
+				
 		/**
 		 * @private
 		 */
@@ -79,12 +83,10 @@ package org.osflash.mixins
 		{
 			if(null == implementation) throw new ArgumentError('Given implementation can not ' + 
 																					'be null');
-			
-			if(definitions[implementation]) throw new ArgumentError('You cannot define() the ' + 
-													'same implementation without removing the ' + 
-													'relationship first.');
-			
-			definitions[implementation] = true;
+			const index : int = definitions.indexOf(implementation);
+			if(index != -1) throw new ArgumentError('You cannot define() the same implementation ' +
+													'without removing the relationship first.');
+			definitions.push(implementation);
 		}
 		
 		/**
@@ -92,20 +94,53 @@ package org.osflash.mixins
 		 */
 		public function generate() : MixinGenerationSignals
 		{
-			const allDefinitions : Vector.<Class> = new Vector.<Class>();
-			
-			for each(var definition : Class in definitions)
-			{
-				allDefinitions.push(definition);
-			}
-			
-			if (allDefinitions.length == 0)
+			if (definitions.length == 0)
 			{
 				throw new IllegalOperationError('No definition classes were defined. Use ' +
 												'define() to create mixins.');
 			}
 			
-			return prepareClasses(allDefinitions, createDynamicClass);
+			const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
+			
+			// go through the classes to prepare and start to register them
+			const total : int = definitions.length;
+			for(var i : int = 0; i<total; i++)
+			{
+				const implementation : Class = definitions[i];
+				
+				const type : Type = Type.getType(implementation);
+				const name : QualifiedName = MixinQualifiedName.create(type);
+				const dynamicClass : DynamicClass = createDynamicClass(name, type);
+				
+				generatedNames[implementation] = name;
+				dynamicClasses[implementation] = dynamicClass;
+				
+				layoutBuilder.registerType(dynamicClass);
+			}
+			
+			// Create the bytecode layout from the layout builder.
+			const layout : IByteCodeLayout = layoutBuilder.createLayout();
+						
+			// Generate a new loader with the containing bytecode
+			return createLoader(layout);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function inject(applicationDomain : ApplicationDomain) : void
+		{
+			const total : int = definitions.length;
+			for(var i : int = 0; i<total; i++)
+			{
+				const implementation : Class = definitions[i];
+				const qname : QualifiedName = generatedNames[implementation];
+				const fullName : String = qname.ns.name.concat('::', qname.name);
+				const generatedClass : Class = applicationDomain.getDefinition(fullName) as Class;
+					
+				// Type.getType(generatedClass);
+				classes[implementation] = generatedClass;
+			}
 		}
 		
 		/**
@@ -142,10 +177,12 @@ package org.osflash.mixins
 		{
 			bindings = MixinBindingList.NIL;
 			
-			for(var definition : Class in definitions)
+			var index : int = definitions.length;
+			while(--index > -1)
 			{
-				delete definitions[definition];
+				definitions.pop();
 			}
+			definitions.length = 0;
 		}
 		
 		/**
@@ -184,39 +221,6 @@ package org.osflash.mixins
 			}
 			
 			return false;
-		}
-		
-		/**
-		 * @private
-		 */
-		protected function prepareClasses(	classesToPrepare : Vector.<Class>, 
-											generator : Function
-										) : MixinGenerationSignals
-		{
-			const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
-			const generatedNames : Dictionary = new Dictionary();
-			
-			// go through the classes to prepare and start to register them
-			const total : int = classesToPrepare.length;
-			for(var i : int = 0; i<total; i++)
-			{
-				const implementation : Class = classesToPrepare[i];
-				
-				const type : Type = Type.getType(implementation);
-				const name : QualifiedName = MixinQualifiedName.create(type);
-				const dynamicClass : DynamicClass = generator(name, type);
-				
-				generatedNames[implementation] = name;
-				dynamicClasses[implementation] = dynamicClass;
-				
-				layoutBuilder.registerType(dynamicClass);
-			}
-			
-			// Create the bytecode layout from the layout builder.
-			const layout : IByteCodeLayout = layoutBuilder.createLayout();
-			
-			// Generate a new loader with the containing bytecode
-			return createLoader(layout);
 		}
 
 		/**

@@ -1,6 +1,5 @@
 package org.osflash.mixins.generator
 {
-	import org.flemit.bytecode.QualifiedName;
 	import org.osflash.mixins.IMixin;
 	import org.osflash.mixins.MixinError;
 	import org.osflash.signals.ISignal;
@@ -93,20 +92,10 @@ package org.osflash.mixins.generator
 		private function handleLoaderCompletedSignal(event : Event) : void
 		{
 			const loaderInfo : LoaderInfo = _loader.contentLoaderInfo;
-			const applicationDomain : ApplicationDomain = loaderInfo.applicationDomain;
-			/*
-			const total : int = classesToPrepare.length;
-			for(var i : int = 0; i<total; i++)
-			{
-				const implementation : Class = classesToPrepare[i];
-				const qname : QualifiedName = generatedNames[implementation];
-				const fullName : String = qname.ns.name.concat('::', qname.name);
-				const generatedClass : Class = applicationDomain.getDefinition(fullName) as Class;
-					
-				// Type.getType(generatedClass);
-				classes[implementation] = generatedClass;
-			}
-			*/
+			const domain : ApplicationDomain = loaderInfo.applicationDomain;
+			
+			mixin.inject(domain);
+			
 			completedSignal.dispatch(_mixin);
 		}
 				
@@ -117,11 +106,11 @@ package org.osflash.mixins.generator
 		{
 			if(event is IOErrorEvent)
 			{
-				_errorSignal.dispatch(mixin, MixinError.IO_ERROR);
+				errorSignal.dispatch(mixin, MixinError.IO_ERROR);
 			}
 			else
 			{
-				_errorSignal.dispatch(mixin, MixinError.ERROR);
+				errorSignal.dispatch(mixin, MixinError.ERROR);
 			}	
 		}
 		
