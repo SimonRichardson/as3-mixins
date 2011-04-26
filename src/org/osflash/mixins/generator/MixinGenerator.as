@@ -82,10 +82,9 @@ package org.osflash.mixins.generator
 												[Instructions.ConstructSuper, argCount]
 												];
 						
-			for (var interfaceType : Type in mixins) 
+			for each(var interfaceType : Type in mixins) 
 			{
-				const proxyObject : Object = mixins[interfaceType];
-				const proxyObjectType : Type = Type.getType(proxyObject);
+				const proxyObjectType : Type = Type.getType(interfaceType);
 				const proxyPropertyName : QualifiedName = buildProxyPropName(	namespaze, 
 																				interfaceType
 																				);

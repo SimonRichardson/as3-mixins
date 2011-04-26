@@ -239,14 +239,15 @@ package org.osflash.mixins
 		protected function cleanup() : void
 		{
 			// This is the most through way to clean everything up.
-			for(var implementation : Class in classes) 
-				delete classes[implementation];
+			var key : String;
+			for(key in classes) 
+				delete classes[key];
 				
-			for(var name : QualifiedName in generatedNames)
-				delete generatedNames[name];
+			for(key in generatedNames)
+				delete generatedNames[key];
 				
-			for(var dynamicClass : DynamicClass in dynamicClasses)
-				delete dynamicClasses[dynamicClass];
+			for(key in dynamicClasses)
+				delete dynamicClasses[key];
 		}
 		
 		/**
