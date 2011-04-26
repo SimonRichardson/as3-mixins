@@ -64,6 +64,8 @@ package org.osflash.mixins
 													'relationship first.');
 			
 			definitions[implementation] = true;
+			
+			// TODO : fire off the generator here. 
 		}
 		
 		/**
@@ -77,6 +79,8 @@ package org.osflash.mixins
 				throw new ArgumentError("A class for " 
 					+ getQualifiedClassName(definitive) + " has not been defined yet.");
 			}
+			
+			
 		}
 		
 		/**
