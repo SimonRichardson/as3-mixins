@@ -1,12 +1,22 @@
 package org.osflash.mixins
 {
-	import org.osflash.mixins.generator.MixinGenerator;
+	import org.flemit.bytecode.ByteCodeLayoutBuilder;
 	import org.flemit.bytecode.DynamicClass;
+	import org.flemit.bytecode.IByteCodeLayout;
+	import org.flemit.bytecode.IByteCodeLayoutBuilder;
 	import org.flemit.bytecode.QualifiedName;
 	import org.flemit.reflection.Type;
 	import org.osflash.mixins.generator.MixinGenerationSignals;
+	import org.osflash.mixins.generator.MixinGenerator;
+	import org.osflash.mixins.generator.MixinLoaderGenerator;
+	import org.osflash.mixins.generator.MixinQualifiedName;
+	import org.osflash.signals.ISignal;
+	import org.osflash.signals.natives.NativeSignal;
 
+	import flash.display.Loader;
 	import flash.errors.IllegalOperationError;
+	import flash.events.Event;
+	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;
 	/**
@@ -29,7 +39,22 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
+		protected const dynamicClasses : Dictionary = new Dictionary();
+		
+		/**
+		 * @private
+		 */
+		protected const classes : Dictionary = new Dictionary();
+		
+		/**
+		 * @private
+		 */
 		protected const mixinGenerator : MixinGenerator = new MixinGenerator();
+		
+		/**
+		 * @private
+		 */
+		protected var loaderCompletedSignal : ISignal;
 		
 		/**
 		 * 
@@ -171,9 +196,61 @@ package org.osflash.mixins
 											generator : Function
 										) : MixinGenerationSignals
 		{
-			return null;
+			const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
+			const generatedNames : Dictionary = new Dictionary();
+			
+			// go through the classes to prepare and start to register them
+			const total : int = classesToPrepare.length;
+			for(var i : int = 0; i<total; i++)
+			{
+				const implementation : Class = classesToPrepare[i];
+				
+				const type : Type = Type.getType(implementation);
+				const name : QualifiedName = MixinQualifiedName.create(type);
+				const dynamicClass : DynamicClass = generator(name, type);
+				
+				generatedNames[implementation] = name;
+				dynamicClasses[implementation] = dynamicClass;
+				
+				layoutBuilder.registerType(dynamicClass);
+			}
+			
+			// Create the bytecode layout from the layout builder.
+			const layout : IByteCodeLayout = layoutBuilder.createLayout();
+			
+			// Generate a new loader with the containing bytecode
+			return createLoader(layout);
 		}
-		
+
+		/**
+		 * @private
+		 */
+		protected function createLoader(layout : IByteCodeLayout) : MixinGenerationSignals
+		{
+			// Set the current application domain.
+			const loaderDomain : ApplicationDomain = getApplicationDomain();
+			const domain : ApplicationDomain = new ApplicationDomain(loaderDomain);
+			
+			// Create the loader			
+			const mixinLoader : MixinLoaderGenerator = new MixinLoaderGenerator(layout, domain);
+			
+			// Using the signals generate loader feedback
+			const signals : MixinGenerationSignals = new MixinGenerationSignals(this, mixinLoader);
+			
+			// Load the bytes
+			mixinLoader.load();
+			
+			return signals;
+		}
+				
+		/**
+		 * @private
+		 */
+		protected function getApplicationDomain() : ApplicationDomain
+		{
+			return ApplicationDomain.currentDomain;
+		}
+				
 		/**
 		 * @private
 		 */
