@@ -97,16 +97,21 @@ package org.osflash.mixins
 		 */
 		public function generate() : MixinGenerationSignals
 		{
-			if (definitions.length == 0)
+			// clean up before we regenerate to prevent conflicts
+			cleanup();
+			
+			// Move on to the generate the classes
+			const total : int = definitions.length;
+			if (total == 0)
 			{
 				throw new IllegalOperationError('No definition classes were defined. Use ' +
 												'define() to create mixins.');
 			}
 			
+			// Create a new layout builder
 			const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
 			
 			// go through the classes to prepare and start to register them
-			const total : int = definitions.length;
 			for(var i : int = 0; i<total; i++)
 			{
 				const implementation : Class = definitions[i];
@@ -224,7 +229,24 @@ package org.osflash.mixins
 			{
 				definitions.pop();
 			}
-			definitions.length = 0;
+			
+			cleanup();
+		}
+		
+		/**
+		 * @private
+		 */
+		protected function cleanup() : void
+		{
+			// This is the most through way to clean everything up.
+			for(var implementation : Class in classes) 
+				delete classes[implementation];
+				
+			for(var name : QualifiedName in generatedNames)
+				delete generatedNames[name];
+				
+			for(var dynamicClass : DynamicClass in dynamicClasses)
+				delete dynamicClasses[dynamicClass];
 		}
 		
 		/**
