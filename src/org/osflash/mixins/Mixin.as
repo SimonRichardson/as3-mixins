@@ -224,8 +224,6 @@ package org.osflash.mixins
 				}
 			}
 			
-			log("ARGUMENTS >> " + argumentValues);
-			
 			return ClassUtility.createClass(definition, argumentValues);
 		}
 		
