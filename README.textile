@@ -26,73 +26,73 @@ h2. Example
 To create a AS3-Mixin you have to define a series of definitions and implementations.
 
 Create a definition IPosition.as in this case it's just an interface.
-==<pre><code>
+<pre><code>
 package org.osflash.mixins.support
 {
-	public interface IPosition
-	{
-		
-		function get x() : int;
-		
-		function set x(value : int) : void;
-		
-		function get y() : int;
-		
-		function set y(value : int) : void;
-	}
+    public interface IPosition
+    {
+        
+        function get x() : int;
+        
+        function set x(value : int) : void;
+        
+        function get y() : int;
+        
+        function set y(value : int) : void;
+    }
 }
-</code></pre>==
+</code></pre>
 
 Create a implementation PositionImpl.as.
-==<pre><code>
+<pre><code>
 package org.osflash.mixins.support.impl
 {
-	import org.osflash.mixins.support.IPosition;
-	
-	public final class PositionImpl implements IPosition
-	{
-		
-		private var _x : int;
-		
-		private var _y : int;
+    import org.osflash.mixins.support.IPosition;
+    
+    public final class PositionImpl implements IPosition
+    {
+        
+        private var _x : int;
+        
+        private var _y : int;
 
-		public function PositionImpl()
-		{
-			_x = 0;
-			_y = 0;
-		}
-		
-		public function get x() : int {	return _x; }
+        public function PositionImpl()
+        {
+            _x = 0;
+            _y = 0;
+        }
+        
+        public function get x() : int {    return _x; }
 
-		public function set x(value : int) : void {	_x = value;	}
+        public function set x(value : int) : void {    _x = value;    }
 
-		public function get y() : int {	return _y; }
+        public function get y() : int {    return _y; }
 
-		public function set y(value : int) : void {	_y = value;	}
-	}
+        public function set y(value : int) : void {    _y = value;    }
+    }
 }
-</code></pre>==
+</code></pre>
 
 Then finally make the definitive implementation that's going to hold your mixin together (note:
 I've also added a ISize definition and SizeImpl to make it a true mixin).
-==<pre><code>
+<pre><code>
 package org.osflash.mixins.support
 {
-	public interface ISquare extends ISize, IPosition
-	{
-	}
+    public interface ISquare extends ISize, IPosition
+    {
+    }
 }
-</code></pre>==
+</code></pre>
 
-Then to sow it altogether:
-==<pre><code>
+Then to sew it altogether:
+<pre><code>
 var mixin : IMixin = new Mixin();
 mixin.add(IPosition, PositionImpl);
 mixin.add(ISize, SizeImpl);
 mixin.define(ISquare);
 mixin.generate().completedSignal.add(function(mixin:Mixin): void
-										{
-											var square : ISquare = mixin.create(ISquare);
-											trace("I have a square!");
-										});
-</code></pre>==
+                                        {
+                                            var square : ISquare = mixin.create(ISquare);
+                                            trace("I have a square!");
+                                        });
+</code></pre>
