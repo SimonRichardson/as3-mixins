@@ -98,8 +98,7 @@ package org.osflash.mixins.generator
 			
 			const instructions : Array = [	[Instructions.GetLocal_0],
 											[Instructions.PushScope],
-											// begin construct super
-											[Instructions.GetLocal_0], // 'this'
+											[Instructions.GetLocal_0],
 											[Instructions.ConstructSuper, baseConstructorArgCount]
 											];
 			
@@ -132,6 +131,8 @@ package org.osflash.mixins.generator
 				
 				instructions.push([Instructions.ConstructProp, implType.qname, implTypeArgCount]);
 				instructions.push([Instructions.InitProperty, descriptorTypeName]);
+				
+				// Add the 'if' check for the arguments 
 				
 				proxies++;
 			}
@@ -387,11 +388,9 @@ package org.osflash.mixins.generator
 			}
 			else
 			{
-				// TODO: Support where base class is not Object
 				return new DynamicMethod(dynamicClass.scriptInitialiser, 3, 2, 1, 3, [
 					[Instructions.GetLocal_0],
 					[Instructions.PushScope],
-					//[GetScopeObject, 0],
 					[Instructions.FindPropertyStrict, dynamicClass.multiNamespaceName], 
 					[Instructions.GetLex, dynamicClass.baseType.qname],
 					[Instructions.PushScope],

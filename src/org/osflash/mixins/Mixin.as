@@ -5,6 +5,7 @@ package org.osflash.mixins
 	import org.flemit.bytecode.IByteCodeLayout;
 	import org.flemit.bytecode.IByteCodeLayoutBuilder;
 	import org.flemit.bytecode.QualifiedName;
+	import org.flemit.reflection.ParameterInfo;
 	import org.flemit.reflection.Type;
 	import org.flemit.util.ClassUtility;
 	import org.flemit.util.MethodUtil;
@@ -154,7 +155,7 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function create(definitive : Class, ...args : Array) : *
+		public function create(definitive : Class, args : Object = null) : *
 		{
 			const definition : Class = classes[definitive];
 			if (definition == null)
@@ -167,19 +168,40 @@ package org.osflash.mixins
 			
 			const constructorArgCount : int = MethodUtil.getRequiredArgumentCount(
 																			classType.constructor);
-					
+			
+			// Find how many arguments there are.			
+			var argsLength : int = 0;
+			var prop : String;
+			for(prop in args)
+				argsLength++;
+			
+			// Parse them for the constructor.				
 			var argumentValues : Array = [];
-			if(args.length == 0 && constructorArgCount > 0)
+			if(argsLength == 0 && constructorArgCount > 0)
 			{
 				throw MixinError.ARGUMENTS_ARE_REQURIED;
 			}															
-			else if(args.length < constructorArgCount)
+			else if(argsLength < constructorArgCount)
 			{
 				throw MixinError.CONSTRUCTOR_ARGUMENT_MISMATCH;
 			}
 			else
 			{
-				argumentValues = args;
+				// Get the parameters out of the dynamic class
+				const dynamicClass : DynamicClass = dynamicClasses[definitive];
+				const params : Array = dynamicClass.constructor.parameters;
+				
+				for (var i : int = 0; i < params.length; i++)
+				{
+					const param : ParameterInfo = params[i];
+					const paramName : String = param.name;
+					
+					if (args.hasOwnProperty(paramName))
+						argumentValues.push(args[paramName]);
+					else if (param.optional == false)
+						throw new ArgumentError('The argument map did not contain an entry for "' + 
+												paramName + '" and this parameter is not optional');
+				}
 			}
 			
 			return ClassUtility.createClass(definition, argumentValues);
