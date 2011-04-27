@@ -1,3 +1,98 @@
 h1. AS3-Mixins
 
-This is a concept to provide mixins to the as3 language easily and robustly without to much hassle.
+AS3-Mixin is a project to enable runtime bytecode generation of mixins. The project uses a strict
+typed setup to mix the interfaces (known as definitions) and concrete classes (known as 
+implementations). 
+
+AS3-Mixin uses the "MIT":http://en.wikipedia.org/wiki/MIT_License license.
+
+h2. Performance
+
+To enable AS3-Mixin to work we have to create a series of SWF's at runtime which will then be 
+injected into your application SWF. This obviously has a hit when creating the application, but
+once the implementation has been created, it is relatively performance free to create new 
+instances of the implementation (relatively meaning that it has to delegate the creation of the
+instance and will be slower than instantiating it by hand).
+
+h2. Thanks
+
+AS3-Mixin uses 
+* "AS3-Signals":https://github.com/robertpenner/as3-signals
+* "FLemit":http://code.google.com/p/flemit/
+* "ASunit":https://github.com/patternpark/asunit
+
+h2. Example
+
+To create a AS3-Mixin you have to define a series of definitions and implementations.
+
+Create a definition IPosition.as in this case it's just an interface.
+==<pre><code>
+package org.osflash.mixins.support
+{
+	public interface IPosition
+	{
+		
+		function get x() : int;
+		
+		function set x(value : int) : void;
+		
+		function get y() : int;
+		
+		function set y(value : int) : void;
+	}
+}
+</code></pre>==
+
+Create a implementation PositionImpl.as.
+==<pre><code>
+package org.osflash.mixins.support.impl
+{
+	import org.osflash.mixins.support.IPosition;
+	
+	public final class PositionImpl implements IPosition
+	{
+		
+		private var _x : int;
+		
+		private var _y : int;
+
+		public function PositionImpl()
+		{
+			_x = 0;
+			_y = 0;
+		}
+		
+		public function get x() : int {	return _x; }
+
+		public function set x(value : int) : void {	_x = value;	}
+
+		public function get y() : int {	return _y; }
+
+		public function set y(value : int) : void {	_y = value;	}
+	}
+}
+</code></pre>==
+
+Then finally make the definitive implementation that's going to hold your mixin together (note:
+I've also added a ISize definition and SizeImpl to make it a true mixin).
+==<pre><code>
+package org.osflash.mixins.support
+{
+	public interface ISquare extends ISize, IPosition
+	{
+	}
+}
+</code></pre>==
+
+Then to sow it altogether:
+==<pre><code>
+var mixin : IMixin = new Mixin();
+mixin.add(IPosition, PositionImpl);
+mixin.add(ISize, SizeImpl);
+mixin.define(ISquare);
+mixin.generate().completedSignal.add(function(mixin:Mixin): void
+										{
+											var square : ISquare = mixin.create(ISquare);
+											trace("I have a square!");
+										});
+</code></pre>==
