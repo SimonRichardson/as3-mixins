@@ -12,14 +12,14 @@ package org.osflash.mixins.support.impl
 		
 		private var _height : int;
 		
-		private var _regularQuad : Boolean;
+		private var _regular : Boolean;
 
-		public function SizeImpl(regularQuad : Boolean = false)
+		public function SizeImpl(regular : Boolean = false)
 		{
 			_width = 0;
 			_height = 0;
 			
-			_regularQuad = regularQuad;
+			_regular = regular;
 		}
 		
 		public function get width() : int
@@ -31,7 +31,7 @@ package org.osflash.mixins.support.impl
 		{
 			_width = value;
 			
-			if(_regularQuad) _height = value;
+			if(_regular) _height = value;
 		}
 		
 		public function get height() : int
@@ -43,7 +43,17 @@ package org.osflash.mixins.support.impl
 		{
 			_height = value;
 			
-			if(_regularQuad) _width = value;
+			if(_regular) _width = value;
+		}
+
+		public function get regular() : Boolean
+		{
+			return _regular;
+		}
+
+		public function set regular(value : Boolean) : void
+		{
+			_regular = value;
 		}
 	}
 }

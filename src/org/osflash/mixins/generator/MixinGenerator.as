@@ -35,7 +35,7 @@ package org.osflash.mixins.generator
 			
 			addInterfaceMembers(dynamicClass);
 			
-			dynamicClass.constructor = createConstructor(dynamicClass, mixins);
+			dynamicClass.constructor = createConstructor(dynamicClass);
 			
 			dynamicClass.addMethodBody(	dynamicClass.scriptInitialiser, 
 										generateScriptInitialiser(dynamicClass)
@@ -53,24 +53,16 @@ package org.osflash.mixins.generator
 		/**
 		 * @private
 		 */
-		protected function createConstructor(	dynamicClass : DynamicClass, 
-												mixins : Dictionary
-												) : MethodInfo
+		protected function createConstructor(dynamicClass : DynamicClass) : MethodInfo
 		{
-			
 			const params:Array = [];
 						
-			for each(var implementation : Class in mixins)
+			const properties : Array = dynamicClass.getProperties();
+			const total : int = properties.length;
+			for (var i : int = 0; i < total; i++) 
 			{
-				const implType : Type = Type.getType(implementation);
-				const ctorParams : Array = implType.constructor.parameters;
-				
-				const total : int = ctorParams.length;
-				for (var i : int = 0; i < total; i++) 
-				{
-					const parameterInfo : ParameterInfo = ctorParams[i];
-					params.push(new ParameterInfo(parameterInfo.name, parameterInfo.type, false));
-				}
+				const propertyInfo : PropertyInfo = properties[i];
+				params.push(new ParameterInfo(propertyInfo.name, propertyInfo.type, true));
 			}
 			
 			return new MethodInfo(	dynamicClass, 
@@ -102,10 +94,6 @@ package org.osflash.mixins.generator
 											[Instructions.ConstructSuper, baseConstructorArgCount]
 											];
 			
-			const constructorArgCount : int = dynamicClass.constructor.parameters.length;
-			
-			var numConstructorArg : int = 0;
-			
 			for(var key : Object in mixins)
 			{
 				const descriptorType : Type = Type(key);							
@@ -113,23 +101,10 @@ package org.osflash.mixins.generator
 																				descriptorType
 																				);
 				const implType : Type = Type.getType(mixins[key]);
-				const implTypeArgCount : int = implType.constructor.parameters.length;
-				
-				numConstructorArg += implTypeArgCount;
-				if(numConstructorArg > constructorArgCount)
-				{
-					throw MixinError.CONSTRUCTOR_ARGUMENT_MISMATCH;
-				}
 				
 				instructions.push([Instructions.GetLocal_0]);
 				instructions.push([Instructions.FindPropertyStrict, implType.qname]);
-				
-				for(var i : int = 0; i<implTypeArgCount; i++)
-				{
-					instructions.push([Instructions.GetLocal, i + 1]);
-				}
-				
-				instructions.push([Instructions.ConstructProp, implType.qname, implTypeArgCount]);
+				instructions.push([Instructions.ConstructProp, implType.qname, 0]);
 				instructions.push([Instructions.InitProperty, descriptorTypeName]);
 				
 				// Add the 'if' check for the arguments 

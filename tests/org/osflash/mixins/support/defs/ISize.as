@@ -13,5 +13,9 @@ package org.osflash.mixins.support.defs
 		function get height() : int;
 		
 		function set height(value : int) : void;
+		
+		function get regular() : Boolean;
+		
+		function set regular(value : Boolean) : void;
 	}
 }

@@ -169,40 +169,62 @@ package org.osflash.mixins
 			const constructorArgCount : int = MethodUtil.getRequiredArgumentCount(
 																			classType.constructor);
 			
-			// Find how many arguments there are.			
-			var argsLength : int = 0;
-			var prop : String;
-			for(prop in args)
-				argsLength++;
+			// Get the parameters out of the dynamic class
+			const dynamicClass : DynamicClass = dynamicClasses[definitive];
+			const params : Array = dynamicClass.constructor.parameters;
+			const paramsTotal : int = params.length;
+			
+			var i : int;
+			var param : ParameterInfo;
+			var paramName : String;
 			
 			// Parse them for the constructor.				
 			var argumentValues : Array = [];
-			if(argsLength == 0 && constructorArgCount > 0)
+			if(null != args)
 			{
-				throw MixinError.ARGUMENTS_ARE_REQURIED;
-			}															
-			else if(argsLength < constructorArgCount)
-			{
-				throw MixinError.CONSTRUCTOR_ARGUMENT_MISMATCH;
+				// Find how many arguments there are.			
+				var argsLength : int = 0;
+				var prop : String;
+				for(prop in args) { argsLength++; }
+				
+				// Work out if we're correct.
+				if(argsLength == 0 && constructorArgCount > 0)
+					throw MixinError.ARGUMENTS_ARE_REQURIED;
+				else if(argsLength < constructorArgCount)
+					throw MixinError.CONSTRUCTOR_ARGUMENT_MISMATCH;
+				else
+				{
+					for (i = 0; i < paramsTotal; i++)
+					{
+						param = params[i];
+						paramName = param.name;
+						
+						if (args.hasOwnProperty(paramName))
+							argumentValues.push(args[paramName]);
+						else if (param.optional == false)
+							throw new ArgumentError('The argument map did not contain an entry for "' + 
+													paramName + '" and this parameter is not optional');
+						else
+							argumentValues.push(null);
+					}
+				}
 			}
 			else
 			{
-				// Get the parameters out of the dynamic class
-				const dynamicClass : DynamicClass = dynamicClasses[definitive];
-				const params : Array = dynamicClass.constructor.parameters;
-				
-				for (var i : int = 0; i < params.length; i++)
+				for (i = 0; i < paramsTotal; i++)
 				{
-					const param : ParameterInfo = params[i];
-					const paramName : String = param.name;
+					param = params[i];
+					paramName = param.name;
 					
-					if (args.hasOwnProperty(paramName))
-						argumentValues.push(args[paramName]);
-					else if (param.optional == false)
+					if (param.optional == false)
 						throw new ArgumentError('The argument map did not contain an entry for "' + 
 												paramName + '" and this parameter is not optional');
+					else
+						argumentValues.push(null);
 				}
 			}
+			
+			log("ARGUMENTS >> " + argumentValues);
 			
 			return ClassUtility.createClass(definition, argumentValues);
 		}

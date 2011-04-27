@@ -55,7 +55,7 @@ package org.osflash.mixins
 
 		private function verifyCreationShapeImplementation(mixin : IMixin) : void
 		{
-			const squareImpl : ISquare = mixin.create(ISquare, {regularQuad:true});
+			const squareImpl : ISquare = mixin.create(ISquare, {regular:true});
 			
 			assertNotNull('ISquare implementation is not null', squareImpl);			
 			assertTrue('Valid creation of ISquare implementation', squareImpl is ISquare);
