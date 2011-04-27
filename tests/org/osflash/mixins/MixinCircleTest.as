@@ -6,8 +6,10 @@ package org.osflash.mixins
 
 	import org.osflash.mixins.generator.MixinGenerationSignals;
 	import org.osflash.mixins.support.ICircle;
+	import org.osflash.mixins.support.IName;
 	import org.osflash.mixins.support.IPosition;
 	import org.osflash.mixins.support.IRadius;
+	import org.osflash.mixins.support.impl.NameImpl;
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.RadiusImpl;
 	/**
@@ -35,6 +37,8 @@ package org.osflash.mixins
 		{
 			mixin.add(IPosition, PositionImpl);
 			mixin.add(IRadius, RadiusImpl);
+			mixin.add(IName, NameImpl);
+			
 			mixin.define(ICircle);
 			
 			const signals : MixinGenerationSignals = mixin.generate();

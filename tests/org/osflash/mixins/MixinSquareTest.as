@@ -6,9 +6,11 @@ package org.osflash.mixins
 	import asunit.asserts.fail;
 
 	import org.osflash.mixins.generator.MixinGenerationSignals;
+	import org.osflash.mixins.support.IName;
 	import org.osflash.mixins.support.IPosition;
 	import org.osflash.mixins.support.ISize;
 	import org.osflash.mixins.support.ISquare;
+	import org.osflash.mixins.support.impl.NameImpl;
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.SizeImpl;
 
@@ -39,6 +41,8 @@ package org.osflash.mixins
 		{
 			mixin.add(IPosition, PositionImpl);
 			mixin.add(ISize, SizeImpl);
+			mixin.add(IName, NameImpl);
+			
 			mixin.define(ISquare);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
@@ -61,6 +65,8 @@ package org.osflash.mixins
 		{
 			mixin.add(IPosition, PositionImpl);
 			mixin.add(ISize, SizeImpl);
+			mixin.add(IName, NameImpl);
+			
 			mixin.define(ISquare);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
@@ -86,6 +92,8 @@ package org.osflash.mixins
 		{
 			mixin.add(IPosition, PositionImpl);
 			mixin.add(ISize, SizeImpl);
+			mixin.add(IName, NameImpl);
+			
 			mixin.define(ISquare);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
@@ -118,6 +126,8 @@ package org.osflash.mixins
 		{
 			mixin.add(IPosition, PositionImpl);
 			mixin.add(ISize, SizeImpl);
+			mixin.add(IName, NameImpl);
+			
 			mixin.define(ISquare);
 			
 			const signals : MixinGenerationSignals = mixin.generate();

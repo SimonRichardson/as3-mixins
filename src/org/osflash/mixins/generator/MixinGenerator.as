@@ -209,6 +209,23 @@ package org.osflash.mixins.generator
 						
 						dynamicClass.addMethod(classMethod);
 						dynamicClass.addMethodBody(classMethod, classMethodBody);
+						
+						const methodNS : BCNamespace = new BCNamespace(	'', 
+																	NamespaceKind.PACKAGE_NAMESPACE
+																	);
+						const methodPropertyName : QualifiedName = buildProxyPropName(	methodNS, 
+																						definition
+																						);
+						if(!dynamicClass.getField(methodPropertyName.name))
+						{
+							dynamicClass.addSlot(new FieldInfo(	dynamicClass, 
+																methodPropertyName.name, 
+																methodPropertyName.toString(), 
+																MemberVisibility.PUBLIC, 
+																false, 
+																definition
+																));
+						}
 					}
 					else
 					{
@@ -236,10 +253,10 @@ package org.osflash.mixins.generator
 						dynamicClass.addProperty(classProperty);
 						
 						
-						const ns : BCNamespace = new BCNamespace(	'', 
+						const proxyNS : BCNamespace = new BCNamespace(	'', 
 																	NamespaceKind.PACKAGE_NAMESPACE
 																	);
-						const proxyPropertyName : QualifiedName = buildProxyPropName(	ns, 
+						const proxyPropertyName : QualifiedName = buildProxyPropName(	proxyNS, 
 																						definition
 																						);
 						
