@@ -1,6 +1,5 @@
 package org.osflash.mixins.generator
 {
-	import flash.net.FileReference;
 	import org.flemit.SWFHeader;
 	import org.flemit.SWFWriter;
 	import org.flemit.bytecode.IByteCodeLayout;
@@ -81,7 +80,7 @@ package org.osflash.mixins.generator
 			const loaderContext:LoaderContext = new LoaderContext(false, _domain);
 			enableAIRDynamicExecution(loaderContext);
 			
-			new FileReference().save(_buffer, "dump.swf");
+			//new FileReference().save(_buffer, "dump.swf");
 			
 			// Loader the buffer to the loaded bytes
 			_loader.loadBytes(_buffer, loaderContext);

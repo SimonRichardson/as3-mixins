@@ -7,7 +7,7 @@ package org.osflash.mixins.support.impl
 	 */
 	public class NameImpl implements IName
 	{
-
+		
 		public function getName() : String
 		{
 			const qname : String = getQualifiedClassName(this);

@@ -3,6 +3,7 @@ package org.osflash.mixins
 	import asunit.asserts.assertNotNull;
 	import asunit.asserts.assertTrue;
 	import asunit.asserts.fail;
+	import asunit.framework.IAsync;
 
 	import org.osflash.mixins.generator.MixinGenerationSignals;
 	import org.osflash.mixins.support.ICircle;
@@ -17,6 +18,9 @@ package org.osflash.mixins
 	 */
 	public class MixinCircleTest
 	{
+		[Inject]
+		public var async : IAsync;
+		
 		protected var mixin : IMixin; 
 		
 		[Before]
@@ -42,7 +46,7 @@ package org.osflash.mixins
 			mixin.define(ICircle);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
-			signals.completedSignal.add(verifyCreationISquareImplementation);
+			signals.completedSignal.add(async.add(verifyCreationISquareImplementation, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
 

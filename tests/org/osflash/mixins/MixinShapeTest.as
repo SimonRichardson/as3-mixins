@@ -1,5 +1,6 @@
 package org.osflash.mixins
 {
+	import asunit.framework.IAsync;
 	import asunit.asserts.assertNotNull;
 	import asunit.asserts.assertTrue;
 	import asunit.asserts.fail;
@@ -18,6 +19,9 @@ package org.osflash.mixins
 	 */
 	public class MixinShapeTest
 	{
+		
+		[Inject]
+		public var async : IAsync;
 		
 		protected var mixin : IMixin; 
 		
@@ -45,7 +49,7 @@ package org.osflash.mixins
 			mixin.define(IRectangle);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
-			signals.completedSignal.add(verifyCreationShapeImplementation);
+			signals.completedSignal.add(async.add(verifyCreationShapeImplementation, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
 

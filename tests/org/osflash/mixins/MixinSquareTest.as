@@ -1,5 +1,6 @@
 package org.osflash.mixins
 {
+	import asunit.framework.IAsync;
 	import asunit.asserts.assertEquals;
 	import asunit.asserts.assertNotNull;
 	import asunit.asserts.assertTrue;
@@ -20,6 +21,9 @@ package org.osflash.mixins
 	 */
 	public class MixinSquareTest
 	{
+		
+		[Inject]
+		public var async : IAsync;
 						
 		protected var mixin : IMixin; 
 		
@@ -46,7 +50,7 @@ package org.osflash.mixins
 			mixin.define(ISquare);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
-			signals.completedSignal.add(verifyCreationISquareImplementation);
+			signals.completedSignal.add(async.add(verifyCreationISquareImplementation, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
 
@@ -61,6 +65,27 @@ package org.osflash.mixins
 		}
 		
 		[Test]
+		public function create_square_mixin_and_verify_getName() : void
+		{
+			mixin.add(IPosition, PositionImpl);
+			mixin.add(ISize, SizeImpl);
+			mixin.add(IName, NameImpl);
+			
+			mixin.define(ISquare);
+			
+			const signals : MixinGenerationSignals = mixin.generate();
+			signals.completedSignal.add(async.add(verifyGetName, 1000));
+			signals.errorSignal.add(failIfCalled);
+		}
+		
+		private function verifyGetName(mixin : Mixin) : void
+		{
+			const impl : ISquare = mixin.create(ISquare, true);
+			
+			assertEquals('ISquare getName should be equal to NameImpl', 'NameImpl', impl.getName());
+		}
+		
+		[Test]
 		public function create_square_mixin_and_add_radius() : void
 		{
 			mixin.add(IPosition, PositionImpl);
@@ -70,7 +95,7 @@ package org.osflash.mixins
 			mixin.define(ISquare);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
-			signals.completedSignal.add(addWidthAndVerifyAddition);
+			signals.completedSignal.add(async.add(addWidthAndVerifyAddition, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
 		
@@ -97,7 +122,7 @@ package org.osflash.mixins
 			mixin.define(ISquare);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
-			signals.completedSignal.add(addSizeMultipleTimesAndVerifyAddition);
+			signals.completedSignal.add(async.add(addSizeMultipleTimesAndVerifyAddition, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
 		
@@ -105,7 +130,7 @@ package org.osflash.mixins
 		{
 			const impl : ISquare = mixin.create(ISquare, true);
 			
-			for(var i : int = 0; i<100; i++)
+			for(var i : int = 0; i<1000; i++)
 			{
 				const width : int = int(Math.random() * Number.MAX_VALUE);
 				
@@ -131,13 +156,15 @@ package org.osflash.mixins
 			mixin.define(ISquare);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
-			signals.completedSignal.add(verifyCreationOfMultipleISquareImplementation);
+			signals.completedSignal.add(async.add(	verifyCreationOfMultipleISquareImplementation, 
+													1000
+													));
 			signals.errorSignal.add(failIfCalled);
 		}
 		
 		private function verifyCreationOfMultipleISquareImplementation(mixin : Mixin) : void
 		{
-			for(var i : int = 0; i<100; i++)
+			for(var i : int = 0; i<1000; i++)
 			{
 				const impl : ISquare = mixin.create(ISquare, true);
 			
