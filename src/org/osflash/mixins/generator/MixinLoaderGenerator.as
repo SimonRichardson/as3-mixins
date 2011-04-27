@@ -82,6 +82,9 @@ package org.osflash.mixins.generator
 			
 			// Loader the buffer to the loaded bytes
 			_loader.loadBytes(_buffer, loaderContext);
+			
+			_buffer.position = 0;
+			_buffer.length = 0;
 		}
 		
 		/**

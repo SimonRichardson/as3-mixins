@@ -1,6 +1,5 @@
 package org.osflash.mixins.generator
 {
-	import org.flemit.reflection.FieldInfo;
 	import org.flemit.bytecode.BCNamespace;
 	import org.flemit.bytecode.DynamicClass;
 	import org.flemit.bytecode.DynamicMethod;
@@ -9,8 +8,10 @@ package org.osflash.mixins.generator
 	import org.flemit.bytecode.NamespaceKind;
 	import org.flemit.bytecode.NamespaceSet;
 	import org.flemit.bytecode.QualifiedName;
+	import org.flemit.reflection.FieldInfo;
 	import org.flemit.reflection.MemberVisibility;
 	import org.flemit.reflection.MethodInfo;
+	import org.flemit.reflection.ParameterInfo;
 	import org.flemit.reflection.PropertyInfo;
 	import org.flemit.reflection.Type;
 	import org.osflash.mixins.MixinError;
@@ -34,7 +35,7 @@ package org.osflash.mixins.generator
 			
 			addInterfaceMembers(dynamicClass);
 			
-			dynamicClass.constructor = createConstructor(dynamicClass);
+			dynamicClass.constructor = createConstructor(dynamicClass, mixins);
 			
 			dynamicClass.addMethodBody(	dynamicClass.scriptInitialiser, 
 										generateScriptInitialiser(dynamicClass)
@@ -52,8 +53,26 @@ package org.osflash.mixins.generator
 		/**
 		 * @private
 		 */
-		protected function createConstructor(dynamicClass : DynamicClass) : MethodInfo
+		protected function createConstructor(	dynamicClass : DynamicClass, 
+												mixins : Dictionary
+												) : MethodInfo
 		{
+			
+			const params:Array = [];
+						
+			for each(var implementation : Class in mixins)
+			{
+				const implType : Type = Type.getType(implementation);
+				const ctorParams : Array = implType.constructor.parameters;
+				
+				const total : int = ctorParams.length;
+				for (var i : int = 0; i < total; i++) 
+				{
+					const parameterInfo : ParameterInfo = ctorParams[i];
+					params.push(new ParameterInfo(parameterInfo.name, parameterInfo.type, false));
+				}
+			}
+			
 			return new MethodInfo(	dynamicClass, 
 									"ctor", 
 									null, 
@@ -61,7 +80,7 @@ package org.osflash.mixins.generator
 									false, 
 									false, 
 									Type.star, 
-									[]
+									params
 								);
 		}
 		
@@ -73,28 +92,45 @@ package org.osflash.mixins.generator
 												) : DynamicMethod
 		{
 			const baseConstructor : MethodInfo = dynamicClass.baseType.constructor;
-			const argCount : uint = baseConstructor.parameters.length;
+			const baseConstructorArgCount : int = baseConstructor.parameters.length;
 			const ns : BCNamespace = new BCNamespace('', NamespaceKind.PACKAGE_NAMESPACE);
 			const proxies : int = 0;
 			
-			const instructions : Array = [		[Instructions.GetLocal_0],
-												[Instructions.PushScope],
-												// begin construct super
-												[Instructions.GetLocal_0], // 'this'
-												[Instructions.ConstructSuper, argCount]
-												];
+			const instructions : Array = [	[Instructions.GetLocal_0],
+											[Instructions.PushScope],
+											// begin construct super
+											[Instructions.GetLocal_0], // 'this'
+											[Instructions.ConstructSuper, baseConstructorArgCount]
+											];
+			
+			const constructorArgCount : int = dynamicClass.constructor.parameters.length;
+			
+			var numConstructorArg : int = 0;
 			
 			for(var key : Object in mixins)
 			{
-				const descriptorType : Type = Type(key);				
+				const descriptorType : Type = Type(key);							
 				const descriptorTypeName : QualifiedName = buildProxyPropName(	ns, 
 																				descriptorType
 																				);
 				const implType : Type = Type.getType(mixins[key]);
+				const implTypeArgCount : int = implType.constructor.parameters.length;
+				
+				numConstructorArg += implTypeArgCount;
+				if(numConstructorArg > constructorArgCount)
+				{
+					throw MixinError.CONSTRUCTOR_ARGUMENT_MISMATCH;
+				}
 				
 				instructions.push([Instructions.GetLocal_0]);
 				instructions.push([Instructions.FindPropertyStrict, implType.qname]);
-				instructions.push([Instructions.ConstructProp, implType.qname, 0]);
+				
+				for(var i : int = 0; i<implTypeArgCount; i++)
+				{
+					instructions.push([Instructions.GetLocal, i + 1]);
+				}
+				
+				instructions.push([Instructions.ConstructProp, implType.qname, implTypeArgCount]);
 				instructions.push([Instructions.InitProperty, descriptorTypeName]);
 				
 				proxies++;

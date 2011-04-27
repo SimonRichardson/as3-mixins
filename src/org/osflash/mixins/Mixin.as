@@ -5,7 +5,6 @@ package org.osflash.mixins
 	import org.flemit.bytecode.IByteCodeLayout;
 	import org.flemit.bytecode.IByteCodeLayoutBuilder;
 	import org.flemit.bytecode.QualifiedName;
-	import org.flemit.reflection.ParameterInfo;
 	import org.flemit.reflection.Type;
 	import org.flemit.util.ClassUtility;
 	import org.flemit.util.MethodUtil;
@@ -114,14 +113,15 @@ package org.osflash.mixins
 			// go through the classes to prepare and start to register them
 			for(var i : int = 0; i<total; i++)
 			{
-				const implementation : Class = definitions[i];
+				const definition : Class = definitions[i];
 				
-				const type : Type = Type.getType(implementation);
+				const type : Type = Type.getType(definition);
+				
 				const name : QualifiedName = MixinQualifiedName.create(type);
 				const dynamicClass : DynamicClass = createDynamicClass(name, type);
 					
-				generatedNames[implementation] = name;
-				dynamicClasses[implementation] = dynamicClass;
+				generatedNames[definition] = name;
+				dynamicClasses[definition] = dynamicClass;
 				
 				layoutBuilder.registerType(dynamicClass);
 			}
@@ -154,7 +154,7 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function create(definitive : Class, args : Object = null) : *
+		public function create(definitive : Class, ...args : Array) : *
 		{
 			const definition : Class = classes[definitive];
 			if (definition == null)
@@ -163,43 +163,23 @@ package org.osflash.mixins
 					+ getQualifiedClassName(definitive) + " has not been defined yet.");
 			}
 			
-			const dynamicClass : DynamicClass = dynamicClasses[definitive];
 			const classType : Type = Type.getType(definition);
-			const params : Array = dynamicClass.constructor.parameters;
 			
-			const argumentValues : Array = [];
-			if(null != args)
-			{
-				const constructorArgCount : int = MethodUtil.getRequiredArgumentCount(
+			const constructorArgCount : int = MethodUtil.getRequiredArgumentCount(
 																			classType.constructor);
-				
-				// Work out how many items in the args Object
-				var argsLength : int = 0;
-				var prop : String;
-				for(prop in args)
-				{
-					argsLength++;
-				}
-				
-				// Make sure they both add up.
-				if (argsLength != constructorArgCount)
-				{
-					throw new ArgumentError('Constructor expects at least ' + 
-																constructorArgCount + 'arguemnts');
-				}
-				
-				const total : int = params.length;
-				for (var i : int = 0; i < total;  i++)
-				{
-					const param : ParameterInfo = params[i];
-					const paramName : String = param.name;
 					
-					if (args.hasOwnProperty(paramName))
-						argumentValues.push(args[paramName]);
-					else if (!param.optional)
-						throw new ArgumentError('The argument map did not contain an entry for "' + 
-												paramName + '" and this parameter is not optional');
-				}
+			var argumentValues : Array = [];
+			if(args.length == 0 && constructorArgCount > 0)
+			{
+				throw MixinError.ARGUMENTS_ARE_REQURIED;
+			}															
+			else if(args.length < constructorArgCount)
+			{
+				throw MixinError.CONSTRUCTOR_ARGUMENT_MISMATCH;
+			}
+			else
+			{
+				argumentValues = args;
 			}
 			
 			return ClassUtility.createClass(definition, argumentValues);
@@ -223,7 +203,7 @@ package org.osflash.mixins
 		public function removeAll() : void
 		{
 			bindings = MixinBindingList.NIL;
-			/*
+			/**
 			var index : int = definitions.length;
 			while(--index > -1)
 			{
@@ -297,7 +277,9 @@ package org.osflash.mixins
 			const loaderDomain : ApplicationDomain = getApplicationDomain();
 			
 			// Create the loader			
-			const mixinLoader : MixinLoaderGenerator = new MixinLoaderGenerator(layout, loaderDomain);
+			const mixinLoader : MixinLoaderGenerator = new MixinLoaderGenerator(	layout, 
+																					loaderDomain
+																					);
 			
 			// Using the signals generate loader feedback
 			const signals : MixinGenerationSignals = new MixinGenerationSignals(this, mixinLoader);

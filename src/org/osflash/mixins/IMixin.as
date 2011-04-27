@@ -46,7 +46,7 @@ package org.osflash.mixins
 		 * @param definitive A defined implementation you want to create as a concrete instance. 
 		 * @throws ArgumentError if implementation is <code>null</code>
 		 */
-		function create(definitive : Class, args : Object = null) : *;
+		function create(definitive : Class, ...args : Array) : *;
 		
 		/**
 		 * Unsubscribes a descriptor and implemenation from the mixin.

@@ -3,7 +3,7 @@ package org.osflash.mixins.support
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public interface ICircle extends IPosition, IRadius
+	public interface IRectangle extends ISize, IPosition
 	{
 	}
 }
