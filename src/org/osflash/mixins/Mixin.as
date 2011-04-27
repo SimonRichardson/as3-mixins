@@ -18,7 +18,6 @@ package org.osflash.mixins
 	import flash.errors.IllegalOperationError;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
-	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -111,7 +110,7 @@ package org.osflash.mixins
 			
 			// Create a new layout builder
 			const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
-			
+						
 			// go through the classes to prepare and start to register them
 			for(var i : int = 0; i<total; i++)
 			{
@@ -120,7 +119,7 @@ package org.osflash.mixins
 				const type : Type = Type.getType(implementation);
 				const name : QualifiedName = MixinQualifiedName.create(type);
 				const dynamicClass : DynamicClass = createDynamicClass(name, type);
-				
+					
 				generatedNames[implementation] = name;
 				dynamicClasses[implementation] = dynamicClass;
 				
@@ -139,12 +138,8 @@ package org.osflash.mixins
 		 */
 		public function inject(applicationDomain : ApplicationDomain) : void
 		{
-			const log : * = getDefinitionByName("trace");
-			
 			const total : int = definitions.length;
-			
-			log("TOTAL " + total);
-		
+					
 			for(var i : int = 0; i<total; i++)
 			{
 				const implementation : Class = definitions[i];
@@ -152,7 +147,6 @@ package org.osflash.mixins
 				const fullName : String = qname.ns.name.concat('::', qname.name);
 				const generatedClass : Class = applicationDomain.getDefinition(fullName) as Class;
 					
-				//Type.getType(generatedClass);
 				classes[implementation] = generatedClass;
 			}
 		}
@@ -301,10 +295,9 @@ package org.osflash.mixins
 		{
 			// Set the current application domain.
 			const loaderDomain : ApplicationDomain = getApplicationDomain();
-			const domain : ApplicationDomain = new ApplicationDomain(loaderDomain);
 			
 			// Create the loader			
-			const mixinLoader : MixinLoaderGenerator = new MixinLoaderGenerator(layout, domain);
+			const mixinLoader : MixinLoaderGenerator = new MixinLoaderGenerator(layout, loaderDomain);
 			
 			// Using the signals generate loader feedback
 			const signals : MixinGenerationSignals = new MixinGenerationSignals(this, mixinLoader);

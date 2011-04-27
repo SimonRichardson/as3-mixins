@@ -1,5 +1,6 @@
 package org.osflash.mixins.generator
 {
+	import org.flemit.reflection.FieldInfo;
 	import org.flemit.bytecode.BCNamespace;
 	import org.flemit.bytecode.DynamicClass;
 	import org.flemit.bytecode.DynamicMethod;
@@ -28,7 +29,7 @@ package org.osflash.mixins.generator
 		{			
 			const superClass : Type = Type.getType(Object);
 			
-			const interfaces : Array = [].concat(base).concat(base.getInterfaces());			
+			const interfaces : Array = [base].concat(base.getInterfaces());			
 			const dynamicClass : DynamicClass = new DynamicClass(name, superClass, interfaces);
 			
 			addInterfaceMembers(dynamicClass);
@@ -36,7 +37,7 @@ package org.osflash.mixins.generator
 			dynamicClass.constructor = createConstructor(dynamicClass);
 			
 			dynamicClass.addMethodBody(	dynamicClass.scriptInitialiser, 
-										generateScriptInitialier(dynamicClass)
+										generateScriptInitialiser(dynamicClass)
 										);
 			dynamicClass.addMethodBody(	dynamicClass.staticInitialiser, 
 										generateStaticInitialiser(dynamicClass)
@@ -44,6 +45,7 @@ package org.osflash.mixins.generator
 			dynamicClass.addMethodBody(	dynamicClass.constructor, 
 										generateInitialiser(dynamicClass, mixins)
 										);
+			
 			return dynamicClass;
 		}
 		
@@ -72,27 +74,28 @@ package org.osflash.mixins.generator
 		{
 			const baseConstructor : MethodInfo = dynamicClass.baseType.constructor;
 			const argCount : uint = baseConstructor.parameters.length;
-			const namespaze : BCNamespace = new BCNamespace('', NamespaceKind.PACKAGE_NAMESPACE);
+			const ns : BCNamespace = new BCNamespace('', NamespaceKind.PACKAGE_NAMESPACE);
 			const proxies : int = 0;
 			
-			const instructions : Array = [	[Instructions.GetLocal_0],
+			const instructions : Array = [		[Instructions.GetLocal_0],
 												[Instructions.PushScope],
 												// begin construct super
 												[Instructions.GetLocal_0], // 'this'
 												[Instructions.ConstructSuper, argCount]
 												];
 			
-			for each(var interfaceType : Class in mixins) 
+			for(var key : Object in mixins)
 			{
-				const proxyObjectType : Type = Type.getType(interfaceType);
-				const proxyPropertyName : QualifiedName = buildProxyPropName(	namespaze, 
-																				proxyObjectType
+				const descriptorType : Type = Type(key);				
+				const descriptorTypeName : QualifiedName = buildProxyPropName(	ns, 
+																				descriptorType
 																				);
+				const implType : Type = Type.getType(mixins[key]);
 				
-				instructions.push([Instructions.FindProperty, proxyPropertyName]);
-				instructions.push([Instructions.FindPropertyStrict, proxyObjectType.qname]);
-				instructions.push([Instructions.ConstructProp, proxyObjectType.qname, 0]);
-				instructions.push([Instructions.InitProperty, proxyPropertyName]);
+				instructions.push([Instructions.GetLocal_0]);
+				instructions.push([Instructions.FindPropertyStrict, implType.qname]);
+				instructions.push([Instructions.ConstructProp, implType.qname, 0]);
+				instructions.push([Instructions.InitProperty, descriptorTypeName]);
 				
 				proxies++;
 			}
@@ -196,6 +199,25 @@ package org.osflash.mixins.generator
 																				);
 						dynamicClass.addProperty(classProperty);
 						
+						
+						const ns : BCNamespace = new BCNamespace(	'', 
+																	NamespaceKind.PACKAGE_NAMESPACE
+																	);
+						const proxyPropertyName : QualifiedName = buildProxyPropName(	ns, 
+																						definition
+																						);
+						
+						if(!dynamicClass.getField(proxyPropertyName.name))
+						{
+							dynamicClass.addSlot(new FieldInfo(	dynamicClass, 
+																proxyPropertyName.name, 
+																proxyPropertyName.toString(), 
+																MemberVisibility.PUBLIC, 
+																false, 
+																definition
+																));
+						}
+						
 						if (property.canRead)
 						{
 							const getter : DynamicMethod = generateMethod(	definition, 
@@ -252,16 +274,26 @@ package org.osflash.mixins.generator
 					instructions.push([Instructions.CallPropVoid, method.qname, argCount]);
 				else
 					instructions.push([Instructions.CallProperty, method.qname, argCount]);
+				
 			}
 			else if (methodType == MethodType.PROPERTY_GET || methodType == MethodType.PROPERTY_SET)
 			{
 				const methodName : String = method.fullName.match(/(\w+)\/\w+$/)[1];
 				const methodQName : QualifiedName = new QualifiedName(ns, methodName); 
-				instructions.push([Instructions.GetLex, proxyPropertyName]);
-				instructions.push([Instructions.GetProperty, methodQName]);
 				
 				if (methodType == MethodType.PROPERTY_SET)
-					instructions.push([Instructions.Pop]);
+				{
+					instructions.push([Instructions.GetLocal_0]);
+					instructions.push([Instructions.GetLex, proxyPropertyName]);
+					instructions.push([Instructions.GetLocal_1]);
+					instructions.push([Instructions.SetProperty, methodQName]);
+				}
+				else
+				{
+					instructions.push([Instructions.GetLocal_0]);
+					instructions.push([Instructions.GetLex, proxyPropertyName]);
+					instructions.push([Instructions.GetProperty, methodQName]);
+				}
 			}
 			
 			if (method.returnType == Type.voidType) // void
@@ -275,7 +307,7 @@ package org.osflash.mixins.generator
 		/**
 		 * @private
 		 */
-		protected function generateScriptInitialier(dynamicClass : DynamicClass) : DynamicMethod
+		protected function generateScriptInitialiser(dynamicClass : DynamicClass) : DynamicMethod
 		{
 			const clsNamespaceSet:NamespaceSet = new NamespaceSet(
 												[new BCNamespace(	dynamicClass.packageName, 

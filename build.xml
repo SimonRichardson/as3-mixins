@@ -43,28 +43,38 @@
 		<java jar="${FLEX_HOME}/lib/mxmlc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
 			<arg value="${tests.dir}/${package.dir}/AllTestsRunner.as"/>
 			<arg value="-incremental=true"/>
+			
 			<arg value="-source-path+=${src.dir}"/>
 			<arg value="-source-path+=${tests.dir}"/>
+			
 			<arg value="-output=${tests.swf}"/>
+			
 			<arg value="-target-player=10"/>
+			
 			<arg value="-default-size=1000,800"/>
 			<arg value="-default-background-color=0x000000"/>
 			<arg value="-static-link-runtime-shared-libraries=true"/>
+			
 			<!-- Include classes from SWCs in this folder, but only the ones we use. -->
+			
 			<arg value="-library-path+=${libs.dir}"/>
+			
 			<arg value="-verbose-stacktraces=true"/>
 			<arg value="-headless-server=true"/>
+			
 			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject"/>
 		</java>
+		
 		<exec executable="open" os="Mac OS X">
 			<arg line='-a "flash player debugger" ${tests.swf}' />
-		</exec>		
+		</exec>
+		
 		<exec executable="cmd.exe" osfamily="windows">
 			<arg line='/C start ${tests.swf}' />
 		</exec>		
-    <exec executable="flashplayer" os="Linux">
-      <arg line="${tests.swf}"/>
-    </exec>
+    	<exec executable="flashplayer" os="Linux">
+      		<arg line="${tests.swf}"/>
+    	</exec>
 	</target>
 	
 	<target name="ci" depends="swc" description="Run unit tests and create JUnit-style reports for continuous integration.">
@@ -75,15 +85,21 @@
 		<java jar="${FLEX_HOME}/lib/mxmlc.jar" dir="${FLEX_HOME}/frameworks" fork="true" failonerror="true">
 			<arg value="${tests.dir}/${package.dir}/AllTestsCIRunner.as"/>
 			<arg value="-incremental=true"/>
+				
 			<arg value="-source-path+=${src.dir}"/>
 			<arg value="-source-path+=${tests.dir}"/>
+			
 			<arg value="-output=${tests.swf}"/>
+			
 			<arg value="-target-player=10"/>
+			
 			<arg value="-default-size=1000,800"/>
 			<arg value="-default-background-color=0x000000"/>
 			<arg value="-static-link-runtime-shared-libraries=true"/>
+		
 			<!-- Include classes from SWCs in this folder, but only the ones we use. -->
 			<arg value="-library-path+=${libs.dir}"/>
+			
 			<arg value="-verbose-stacktraces=true"/>
 			<arg value="-headless-server=true"/>
 			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject"/>

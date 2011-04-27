@@ -55,15 +55,6 @@ package org.osflash.mixins.generator
 			_layout = layout;
 			_domain = domain;
 			
-			create();
-		}
-		
-		/**
-		 * Create a new mixin loader. This is a swf file with the bytecode injected into the
-		 * ABC Tag. This is then loaded at runtime.
-		 */
-		public function create() : void
-		{
 			const header:SWFHeader = new SWFHeader(SWF_HEARDER_TYPE);
 			const swfWriter:SWFWriter = new SWFWriter();
 				
@@ -71,15 +62,15 @@ package org.osflash.mixins.generator
 					FileAttributesTag.create(false, false, false, true, true),
 					new ScriptLimitsTag(),
 					new SetBackgroundColorTag(0xFF, 0x0, 0x0),
-					new FrameLabelTag("ProxyFrameLabel"),
-					new DoABCTag(false, "ProxyGenerated", _layout),
+					new FrameLabelTag("MixinFrameLabel"),
+					new DoABCTag(false, "MixinGenerated", _layout),
 					new ShowFrameTag(),
 					new EndTag()
 			]);
 			
 			_buffer.position = 0;
 		}
-		
+				
 		/**
 		 * Load the bytecode in to the aync Loader for the execution.
 		 */
