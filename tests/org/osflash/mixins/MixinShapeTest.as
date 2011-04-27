@@ -1,19 +1,19 @@
 package org.osflash.mixins
 {
-	import asunit.framework.IAsync;
 	import asunit.asserts.assertNotNull;
 	import asunit.asserts.assertTrue;
 	import asunit.asserts.fail;
-
+	import asunit.framework.IAsync;
 	import org.osflash.mixins.generator.MixinGenerationSignals;
-	import org.osflash.mixins.support.IName;
-	import org.osflash.mixins.support.IPosition;
 	import org.osflash.mixins.support.IRectangle;
-	import org.osflash.mixins.support.ISize;
 	import org.osflash.mixins.support.ISquare;
+	import org.osflash.mixins.support.defs.IName;
+	import org.osflash.mixins.support.defs.IPosition;
+	import org.osflash.mixins.support.defs.ISize;
 	import org.osflash.mixins.support.impl.NameImpl;
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.SizeImpl;
+
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */

@@ -1,6 +1,6 @@
 package org.osflash.mixins.support.impl
 {
-	import org.osflash.mixins.support.IPosition;
+	import org.osflash.mixins.support.defs.IPosition;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */

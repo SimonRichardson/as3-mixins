@@ -1,6 +1,6 @@
 package org.osflash.mixins.support.impl
 {
-	import org.osflash.mixins.support.ISize;
+	import org.osflash.mixins.support.defs.ISize;
 
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk

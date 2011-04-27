@@ -1,7 +1,7 @@
 package org.osflash.mixins.support.impl
 {
 	import flash.utils.getQualifiedClassName;
-	import org.osflash.mixins.support.IName;
+	import org.osflash.mixins.support.defs.IName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
