@@ -56,7 +56,7 @@ package org.osflash.mixins
 
 		private function verifyCreationISquareImplementation(mixin : IMixin) : void
 		{
-			const impl : ISquare = mixin.create(ISquare, true);
+			const impl : ISquare = mixin.create(ISquare, {regular:true});
 			
 			assertNotNull('ISquare implementation is not null', impl);			
 			assertTrue('Valid creation of ISquare implementation', impl is ISquare);
@@ -80,7 +80,7 @@ package org.osflash.mixins
 		
 		private function verifyGetName(mixin : Mixin) : void
 		{
-			const impl : ISquare = mixin.create(ISquare, true);
+			const impl : ISquare = mixin.create(ISquare, {regular:true});
 			
 			assertEquals('ISquare getName should be equal to NameImpl', 'NameImpl', impl.getName());
 		}
@@ -101,7 +101,7 @@ package org.osflash.mixins
 		
 		private function addWidthAndVerifyAddition(mixin : Mixin) : void
 		{
-			const impl : ISquare = mixin.create(ISquare, true);
+			const impl : ISquare = mixin.create(ISquare, {regular:true});
 			
 			impl.width = 5;
 			
@@ -128,7 +128,7 @@ package org.osflash.mixins
 		
 		private function addSizeMultipleTimesAndVerifyAddition(mixin : Mixin) : void
 		{
-			const impl : ISquare = mixin.create(ISquare, true);
+			const impl : ISquare = mixin.create(ISquare, {regular:true});
 			
 			for(var i : int = 0; i<1000; i++)
 			{
@@ -166,7 +166,7 @@ package org.osflash.mixins
 		{
 			for(var i : int = 0; i<1000; i++)
 			{
-				const impl : ISquare = mixin.create(ISquare, true);
+				const impl : ISquare = mixin.create(ISquare, {regular:true});
 			
 				assertNotNull('ISquare implementation is not null', impl);			
 				assertTrue('Valid creation of ISquare implementation', impl is ISquare);
