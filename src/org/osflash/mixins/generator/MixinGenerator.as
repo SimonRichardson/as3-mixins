@@ -86,7 +86,8 @@ package org.osflash.mixins.generator
 			const baseConstructor : MethodInfo = dynamicClass.baseType.constructor;
 			const baseConstructorArgCount : int = baseConstructor.parameters.length;
 			const ns : BCNamespace = new BCNamespace('', NamespaceKind.PACKAGE_NAMESPACE);
-			const proxies : int = 0;
+			
+			var proxies : int = 0;
 			
 			const instructions : Array = [	[Instructions.GetLocal_0],
 											[Instructions.PushScope],
@@ -94,6 +95,7 @@ package org.osflash.mixins.generator
 											[Instructions.ConstructSuper, baseConstructorArgCount]
 											];
 			
+			var local : int = 0; 
 			for(var key : Object in mixins)
 			{
 				const descriptorType : Type = Type(key);							
@@ -107,7 +109,23 @@ package org.osflash.mixins.generator
 				instructions.push([Instructions.ConstructProp, implType.qname, 0]);
 				instructions.push([Instructions.InitProperty, descriptorTypeName]);
 				
-				// Add the 'if' check for the arguments 
+				// TODO : Add the 'if' check for the arguments 
+				const properties : Array = descriptorType.getProperties();
+				const total : int = properties.length;
+				for(var i : int = 0; i<total; i++)
+				{
+					local++;
+					
+					const propertyInfo : PropertyInfo = properties[i];
+					
+					const propertyTypeName : QualifiedName = buildPropName( ns,
+																			propertyInfo.name
+																			);
+					
+					instructions.push([Instructions.GetLocal_0]);
+					instructions.push([Instructions.GetLocal, local]);
+					instructions.push([Instructions.InitProperty, propertyTypeName]);
+				}
 				
 				proxies++;
 			}
@@ -136,6 +154,17 @@ package org.osflash.mixins.generator
 		{
 			const name : String = '_' +interfaceType.fullName.replace(/[\. : ]/g, '_');
 			return new QualifiedName(ns, name);
+		}
+		
+		/**
+		 * @private
+		 */
+		protected function buildPropName(	ns : BCNamespace,
+											propertyName : String
+											) : QualifiedName
+		{
+			// TODO : sanity check the property name
+			return new QualifiedName(ns, propertyName);
 		}
 		
 		/**
