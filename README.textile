@@ -16,6 +16,10 @@ instance and will be slower than instantiating it by hand).
 
 h2. Thanks
 
+The inspiration for this was "AS3-retrofit":https://github.com/brianheylin/as3-retrofit, although
+I've removed quite a lot from that. Also there are subtle changes through out, but there could
+be a time where I move this back to AS3-retrofit, although I think AS3-Mixins sounds better.
+
 AS3-Mixin uses 
 * "AS3-Signals":https://github.com/robertpenner/as3-signals
 * "FLemit":http://code.google.com/p/flemit/
