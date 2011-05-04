@@ -100,11 +100,11 @@ package org.osflash.mixins
 			return wholeClone;
 		}		
 		
-		public function filterNot(descriptor : Class) : MixinBindingList
+		public function filterNot(key : Class) : MixinBindingList
 		{
-			if (!nonEmpty || descriptor == null) return this;
+			if (!nonEmpty || key == null) return this;
 
-			if (descriptor == head.key) return tail;
+			if (key == head.key) return tail;
 
 			// The first item wasn't a match so the filtered list will contain it.
 			const wholeClone : MixinBindingList = new MixinBindingList(head);
@@ -113,7 +113,7 @@ package org.osflash.mixins
 			
 			while (current.nonEmpty)
 			{
-				if (current.head.key == descriptor)
+				if (current.head.key == key)
 				{
 					// Splice out the current head.
 					subClone.tail = current.tail;
@@ -128,28 +128,28 @@ package org.osflash.mixins
 			return this;
 		}
 
-		public function contains(descriptor : Class) : Boolean
+		public function contains(key : Class) : Boolean
 		{
 			if (!nonEmpty) return false;
 
 			var p : MixinBindingList = this;
 			while (p.nonEmpty)
 			{
-				if (p.head.key == descriptor) return true;
+				if (p.head.key == key) return true;
 				p = p.tail;
 			}
 
 			return false;
 		}
 
-		public function find(descriptor : Class) : IMixinBinding
+		public function find(key : Class) : IMixinBinding
 		{
 			if (!nonEmpty) return null;
 
 			var p : MixinBindingList = this;
 			while (p.nonEmpty)
 			{
-				if (p.head.key == descriptor) return p.head;
+				if (p.head.key == key) return p.head;
 				p = p.tail;
 			}
 

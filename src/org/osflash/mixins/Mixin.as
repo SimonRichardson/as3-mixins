@@ -8,6 +8,7 @@ package org.osflash.mixins
 	import org.flemit.reflection.ParameterInfo;
 	import org.flemit.reflection.Type;
 	import org.flemit.util.ClassUtility;
+	import org.flemit.util.DescribeTypeUtil;
 	import org.flemit.util.MethodUtil;
 	import org.osflash.mixins.generator.MixinGenerationSignals;
 	import org.osflash.mixins.generator.MixinGenerator;
@@ -17,6 +18,7 @@ package org.osflash.mixins
 	import flash.errors.IllegalOperationError;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
+	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -127,16 +129,40 @@ package org.osflash.mixins
 			var definitionsToProcess : MixinBindingList = definitions;
 			while (definitionsToProcess.nonEmpty)
 			{
-				const binding : IMixinBinding = definitionsToProcess.head;
-				const definition : Class = binding.key;
-				const superClass : Class = binding.value;
+				const definitionBinding : IMixinBinding = definitionsToProcess.head;
+				const definition : Class = definitionBinding.key;
+				const superClass : Class = definitionBinding.value;
 				
 				const type : Type = Type.getType(definition);
 				const superType : Type = Type.getType(superClass);
 				
-				const name : QualifiedName = MixinQualifiedName.create(type);
-				const dynamicClass : DynamicClass = createDynamicClass(name, type, superType);
+				const injectors : Dictionary = new Dictionary();
+				if(superType.name != "Object")
+				{
+					const description : XML = DescribeTypeUtil.describe(superClass);
+					const variables : XMLList = description..variable.(metadata.@name == 'Inject');
+					for each(var variable : XML in variables)
+					{
+						const variableName : String = variable.@name;
+						const variableType : String = variable.@type;
+						
+						if(variableType == type.qname.toString())
+						{
+							injectors[variableName] = type;
+						}
+						else
+						{
+							throw new IllegalOperationError("Unable to Inject");
+						}
+					}
+				}
 					
+				const name : QualifiedName = MixinQualifiedName.create(type);
+				const dynamicClass : DynamicClass = createDynamicClass(	name, 
+																		type, 
+																		superType, 
+																		injectors
+																		);
 				generatedNames[definition] = name;
 				dynamicClasses[definition] = dynamicClass;
 				
@@ -422,7 +448,8 @@ package org.osflash.mixins
 		 */
 		protected function createDynamicClass(	name : QualifiedName, 
 												base : Type, 
-												superType : Type
+												superType : Type,
+												injectors : Dictionary
 												) : DynamicClass
 		{
 			const interfaces : Array = base.getInterfaces();
