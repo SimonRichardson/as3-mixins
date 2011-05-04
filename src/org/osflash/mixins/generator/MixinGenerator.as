@@ -45,11 +45,7 @@ package org.osflash.mixins.generator
 			dynamicClass.addMethodBody(	dynamicClass.constructor, 
 										generateInitialiser(dynamicClass, mixins)
 										);
-			
-									
-			//dynamicClass.addMethodBody(	new MethodInfo(type, name, fullName, visibility, isStatic, isOverride, returnType, parameters)
-			
-			
+						
 			return dynamicClass;
 		}
 				
@@ -96,17 +92,81 @@ package org.osflash.mixins.generator
 		{
 			const baseConstructor : MethodInfo = dynamicClass.baseType.constructor;
 			const baseConstructorArgCount : int = baseConstructor.parameters.length;
-			const ns : BCNamespace = new BCNamespace('', NamespaceKind.PACKAGE_NAMESPACE);
 			
-			var proxies : int = 0;
+			
 			
 			const instructions : Array = [	[Instructions.GetLocal_0],
 											[Instructions.PushScope],
 											[Instructions.GetLocal_0],
-											[Instructions.ConstructSuper, baseConstructorArgCount]
+											[Instructions.ConstructSuper, baseConstructorArgCount],
+											[Instructions.GetLocal_0]
 											];
 			
+			const constructor : MethodInfo = dynamicClass.constructor;
+			const constructorArgCount : int = constructor.parameters.length;
+			for(var i : int = 0; i<constructorArgCount; i++)
+			{
+				instructions.push([Instructions.GetLocal, i + 1]);
+			}
+			
+			// create the __init__ method 
+			const initMethod : MethodInfo = generateInitMethod(dynamicClass, mixins);
+			// Finish the constructor
+			instructions.push(
+				[Instructions.CallPropVoid, initMethod.qname, constructorArgCount],
+				[Instructions.ReturnVoid]
+			);
+			
+			const argumentBytes : int = constructorArgCount * 9;		
+			return new DynamicMethod(	constructor, 
+										6 + argumentBytes, 
+										3 + argumentBytes, 
+										4, 
+										5, 
+										instructions
+										);
+		}
+		
+		/**
+		 * @private
+		 */
+		protected function generateInitMethod(	dynamicClass : DynamicClass,
+												mixins : Dictionary
+												) : MethodInfo
+		{
+			var i : int;
+			var total : int;
+			
+			var propertyInfo : PropertyInfo;
+			var properties : Array = dynamicClass.getProperties();
+			
+			const params:Array = [];
+						
+			total = properties.length;
+			for (i = 0; i < total; i++) 
+			{
+				propertyInfo = properties[i];
+				params.push(new ParameterInfo(propertyInfo.name, propertyInfo.type, true));
+			}
+			
+			const ns : BCNamespace = new BCNamespace('', NamespaceKind.PACKAGE_NAMESPACE);
+			const method : MethodInfo = new MethodInfo(	dynamicClass, 
+														"__init__", 
+														null, 
+														MemberVisibility.PUBLIC, 
+														false, 
+														false, 
+														Type.voidType, 
+														params
+														);
+														
+			const instructions : Array = [	[Instructions.GetLocal_0],
+											[Instructions.PushScope]
+											];
+											
 			var local : int = 0; 
+			var proxies : int = 0;
+			
 			for(var key : Object in mixins)
 			{
 				const descriptorType : Type = Type(key);							
@@ -118,15 +178,15 @@ package org.osflash.mixins.generator
 				instructions.push([Instructions.GetLocal_0]);
 				instructions.push([Instructions.FindPropertyStrict, implType.qname]);
 				instructions.push([Instructions.ConstructProp, implType.qname, 0]);
-				instructions.push([Instructions.InitProperty, descriptorTypeName]);
+				instructions.push([Instructions.SetProperty, descriptorTypeName]);
 				
-				const properties : Array = descriptorType.getProperties();
-				const total : int = properties.length;
-				for(var i : int = 0; i<total; i++)
+				properties = descriptorType.getProperties();
+				total = properties.length;
+				for(i = 0; i<total; i++)
 				{
 					local++;
 					
-					const propertyInfo : PropertyInfo = properties[i];
+					propertyInfo = properties[i];
 					
 					const propertyTypeName : QualifiedName = buildPropName( ns,
 																			propertyInfo.name
@@ -134,7 +194,7 @@ package org.osflash.mixins.generator
 					
 					instructions.push([Instructions.GetLocal_0]);
 					instructions.push([Instructions.GetLocal, local]);
-					instructions.push([Instructions.InitProperty, propertyTypeName]);
+					instructions.push([Instructions.SetProperty, propertyTypeName]);
 				}
 				
 				proxies++;
@@ -144,15 +204,17 @@ package org.osflash.mixins.generator
 				[Instructions.ReturnVoid]
 			);
 			
+			// Finish off the init method
 			const argumentBytes : int = proxies * 9;
-				
-			return new DynamicMethod(	dynamicClass.constructor, 
-										6 + argumentBytes, 
-										3 + argumentBytes, 
-										4, 
-										5, 
-										instructions
-										);
+			dynamicClass.addMethod(method);
+			dynamicClass.addMethodBody(method, new DynamicMethod(	method, 
+																	6 + argumentBytes, 
+																	3 + argumentBytes, 
+																	4, 
+																	5, 
+																	instructions
+																	));
+			return method;
 		}
 		
 		/**
