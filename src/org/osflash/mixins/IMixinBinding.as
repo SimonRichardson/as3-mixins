@@ -9,16 +9,16 @@ package org.osflash.mixins
 		/**
 		 * 
 		 */
-		function get descriptor() : Class;
+		function get key() : Class;
 		
-		function set descriptor(value :  Class) : void;
+		function set key(value :  Class) : void;
 		
 		/**
 		 * 
 		 */
-		function get implementation() : Class;
+		function get value() : Class;
 		
-		function set implementation(value :  Class) : void;
+		function set value(value :  Class) : void;
 		
 		/**
 		 * 

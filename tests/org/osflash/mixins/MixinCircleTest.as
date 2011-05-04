@@ -4,11 +4,13 @@ package org.osflash.mixins
 	import asunit.asserts.assertTrue;
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
+
 	import org.osflash.mixins.generator.MixinGenerationSignals;
 	import org.osflash.mixins.support.ICircle;
 	import org.osflash.mixins.support.defs.IName;
 	import org.osflash.mixins.support.defs.IPosition;
 	import org.osflash.mixins.support.defs.IRadius;
+	import org.osflash.mixins.support.impl.CircleImpl;
 	import org.osflash.mixins.support.impl.NameImpl;
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.RadiusImpl;
@@ -43,7 +45,7 @@ package org.osflash.mixins
 			mixin.add(IRadius, RadiusImpl);
 			mixin.add(IName, NameImpl);
 			
-			mixin.define(ICircle);
+			mixin.define(ICircle, CircleImpl);
 			
 			const signals : MixinGenerationSignals = mixin.generate();
 			signals.completedSignal.add(async.add(verifyCreationISquareImplementation, 1000));
@@ -53,7 +55,7 @@ package org.osflash.mixins
 		private function verifyCreationISquareImplementation(mixin : IMixin) : void
 		{
 			const impl : ICircle = mixin.create(ICircle);
-			
+						
 			assertNotNull('ICircle implementation is not null', impl);			
 			assertTrue('Valid creation of ICircle implementation', impl is ICircle);
 			assertTrue('Valid creation of IRadius implementation', impl is IRadius);

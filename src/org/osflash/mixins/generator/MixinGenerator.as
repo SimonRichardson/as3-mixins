@@ -24,14 +24,13 @@ package org.osflash.mixins.generator
 	{
 
 		public function generate(	name : QualifiedName, 
-									base : Type, 
+									base : Type,
+									superType : Type,
 									mixins : Dictionary
 								) : DynamicClass
 		{			
-			const superClass : Type = Type.getType(Object);
-			
 			const interfaces : Array = [base].concat(base.getInterfaces());			
-			const dynamicClass : DynamicClass = new DynamicClass(name, superClass, interfaces);
+			const dynamicClass : DynamicClass = new DynamicClass(name, superType, interfaces);
 			
 			addInterfaceMembers(dynamicClass);
 			
@@ -46,6 +45,10 @@ package org.osflash.mixins.generator
 			dynamicClass.addMethodBody(	dynamicClass.constructor, 
 										generateInitialiser(dynamicClass, mixins)
 										);
+			
+									
+			//dynamicClass.addMethodBody(	new MethodInfo(type, name, fullName, visibility, isStatic, isOverride, returnType, parameters)
+			
 			
 			return dynamicClass;
 		}

@@ -21,10 +21,12 @@ package org.osflash.mixins
 		 * Define an implementation for the mixin to create. This is the base for the mixin, which
 		 * will be created from the descriptor and defined with the implementation.
 		 * @param implementation A base class that will be verified and created with the added implementations.
+		 * @param superClass A class that will be the superClass of the implementation.
+		 * @return a IMixinBinding, which contains the implementation and superClass as parameters.
 		 * @throws ArgumentError if implementation is <code>null</code>
 		 * @throws ArgumentError if the implementation doesn't implement the descriptors
 		 */
-		function define(implementation : Class) : void;
+		function define(implementation : Class, superClass : Class = null) : IMixinBinding;
 		
 		/**
 		 * Generate the new mixins, a callback can be used to find out if the process was

@@ -9,22 +9,22 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
-		private var _descriptor : Class;
+		private var _key : Class;
 		
 		/**
 		 * @private
 		 */
-		private var _implementation : Class;
+		private var _value : Class;
 		
 		/**
 		 * @private
 		 */
 		private var _ignore : Boolean;
 
-		public function MixinBinding(descriptor : Class, implementation : Class)
+		public function MixinBinding(key : Class, value : Class)
 		{
-			_descriptor = descriptor;
-			_implementation = implementation;
+			_key = key;
+			_value = value;
 			
 			_ignore = false;
 		}
@@ -32,14 +32,14 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function get descriptor() : Class { return _descriptor; }
-		public function set descriptor(value : Class) : void { _descriptor = value;	}
+		public function get key() : Class { return _key; }
+		public function set key(value : Class) : void { _key = value;	}
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function get implementation() : Class { return _implementation; }
-		public function set implementation(value : Class) : void { _implementation = value; }
+		public function get value() : Class { return _value; }
+		public function set value(value : Class) : void { _value = value; }
 		
 		/**
 		 * @inheritDoc

@@ -104,7 +104,7 @@ package org.osflash.mixins
 		{
 			if (!nonEmpty || descriptor == null) return this;
 
-			if (descriptor == head.descriptor) return tail;
+			if (descriptor == head.key) return tail;
 
 			// The first item wasn't a match so the filtered list will contain it.
 			const wholeClone : MixinBindingList = new MixinBindingList(head);
@@ -113,7 +113,7 @@ package org.osflash.mixins
 			
 			while (current.nonEmpty)
 			{
-				if (current.head.descriptor == descriptor)
+				if (current.head.key == descriptor)
 				{
 					// Splice out the current head.
 					subClone.tail = current.tail;
@@ -135,7 +135,7 @@ package org.osflash.mixins
 			var p : MixinBindingList = this;
 			while (p.nonEmpty)
 			{
-				if (p.head.descriptor == descriptor) return true;
+				if (p.head.key == descriptor) return true;
 				p = p.tail;
 			}
 
@@ -149,7 +149,7 @@ package org.osflash.mixins
 			var p : MixinBindingList = this;
 			while (p.nonEmpty)
 			{
-				if (p.head.descriptor == descriptor) return p.head;
+				if (p.head.key == descriptor) return p.head;
 				p = p.tail;
 			}
 

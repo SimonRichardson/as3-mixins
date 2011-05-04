@@ -32,7 +32,7 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
-		protected const definitions : Vector.<Class> = new Vector.<Class>();
+		protected var definitions : MixinBindingList = MixinBindingList.NIL;
 		
 		/**
 		 * @private
@@ -79,6 +79,8 @@ package org.osflash.mixins
 			if(null == descriptor) throw new ArgumentError('Given descriptor can not be null.');
 			if(null == implementation) throw new ArgumentError('Given implementation can not ' +
 																					'be null');
+			if(definitions.contains(descriptor)) throw new ArgumentError('You can not ' + 
+											'add a descriptor that is already a implementation');
 																					
 			return registerDescriptor(descriptor, implementation);
 		}
@@ -86,14 +88,20 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function define(implementation : Class) : void
+		public function define(implementation : Class, superClass : Class = null) : IMixinBinding
 		{
 			if(null == implementation) throw new ArgumentError('Given implementation can not ' + 
 																					'be null');
-			const index : int = definitions.indexOf(implementation);
-			if(index != -1) throw new ArgumentError('You cannot define() the same implementation ' +
-													'without removing the relationship first.');
-			definitions.push(implementation);
+			if(bindings.contains(implementation)) throw new ArgumentError('You can not ' +
+										'define() a implementation that is already a descriptor');
+			if(definitions.contains(implementation)) throw new ArgumentError('You can not ' + 
+					'define() the same implementation without removing the relationship first.');
+			
+			// If we've not got a super class then make one.
+			if(null == superClass) 
+				superClass = Object;
+			
+			return registerImplementation(implementation, superClass);
 		}
 		
 		/**
@@ -116,19 +124,25 @@ package org.osflash.mixins
 			const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
 						
 			// go through the classes to prepare and start to register them
-			for(var i : int = 0; i<total; i++)
+			var definitionsToProcess : MixinBindingList = definitions;
+			while (definitionsToProcess.nonEmpty)
 			{
-				const definition : Class = definitions[i];
+				const binding : IMixinBinding = definitionsToProcess.head;
+				const definition : Class = binding.key;
+				const superClass : Class = binding.value;
 				
 				const type : Type = Type.getType(definition);
+				const superType : Type = Type.getType(superClass);
 				
 				const name : QualifiedName = MixinQualifiedName.create(type);
-				const dynamicClass : DynamicClass = createDynamicClass(name, type);
+				const dynamicClass : DynamicClass = createDynamicClass(name, type, superType);
 					
 				generatedNames[definition] = name;
 				dynamicClasses[definition] = dynamicClass;
 				
 				layoutBuilder.registerType(dynamicClass);
+				
+				definitionsToProcess = definitionsToProcess.tail;
 			}
 			
 			// Create the bytecode layout from the layout builder.
@@ -141,20 +155,22 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function inject(applicationDomain : ApplicationDomain) : void
+		public function inject(domain : ApplicationDomain) : void
 		{
-			const total : int = definitions.length;
-					
-			for(var i : int = 0; i<total; i++)
+			var definitionsToProcess : MixinBindingList = definitions;
+			while (definitionsToProcess.nonEmpty)
 			{
-				const implementation : Class = definitions[i];
-				const qname : QualifiedName = generatedNames[implementation];
+				const definition : Class = definitionsToProcess.head.key;
+				
+				const qname : QualifiedName = generatedNames[definition];
 				const fullName : String = qname.ns.name.concat('::', qname.name);
-				const generatedClass : Class = applicationDomain.getDefinition(fullName) as Class;
-					
-				classes[implementation] = generatedClass;
+				const generatedClass : Class = domain.getDefinition(fullName) as Class;
+				
+				classes[definition] = generatedClass;
+				
+				definitionsToProcess = definitionsToProcess.tail;
 			}
-			
+						
 			mixinGenerator.dispose();
 		}
 		
@@ -265,13 +281,7 @@ package org.osflash.mixins
 		public function removeAll() : void
 		{
 			bindings = MixinBindingList.NIL;
-			/**
-			var index : int = definitions.length;
-			while(--index > -1)
-			{
-				definitions.pop();
-			}
-			*/
+			definitions = MixinBindingList.NIL;
 			
 			cleanup();
 		}
@@ -305,10 +315,11 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
-		protected function registerDescriptor(descriptor : Class, 
-												implementation : Class) : IMixinBinding
+		protected function registerDescriptor(	descriptor : Class, 
+												implementation : Class
+												) : IMixinBinding
 		{
-			if(registrationPossible(descriptor, implementation))
+			if(registrationDescriptorPossible(descriptor, implementation))
 			{
 				const binding : IMixinBinding = new MixinBinding(descriptor, implementation);
 				bindings = bindings.append(binding);
@@ -321,15 +332,56 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
-		protected function registrationPossible(descriptor : Class,
-													implementation : Class) : Boolean
+		protected function registrationDescriptorPossible(	descriptor : Class,
+															implementation : Class
+															) : Boolean
 		{
 			if (!bindings.nonEmpty) return true;
 			
 			const existingBindings : IMixinBinding = bindings.find(descriptor);
 			if (!existingBindings) return true;
 			
-			if(existingBindings.implementation != implementation)
+			if(existingBindings.value != implementation)
+			{
+				// If the listener was previously added, definitely don't add it again.
+				// But throw an exception if their once values differ.
+				throw new IllegalOperationError('You cannot add() the same implementation ' + 
+												 ' without removing the relationship first.');
+			}
+			
+			return false;
+		}
+		
+		/**
+		 * @private
+		 */
+		protected function registerImplementation(	implementation : Class, 
+													superClass : Class
+													) : IMixinBinding
+		{
+			if(registrationImplementationPossible(implementation, superClass))
+			{
+				const binding : IMixinBinding = new MixinBinding(implementation, superClass);
+				definitions = definitions.append(binding);
+				return binding;
+			}
+			
+			return definitions.find(implementation);
+		}
+		
+		/**
+		 * @private
+		 */
+		protected function registrationImplementationPossible(	implementation : Class,
+																superClass : Class
+																) : Boolean
+		{
+			if (!definitions.nonEmpty) return true;
+			
+			const existingBindings : IMixinBinding = definitions.find(implementation);
+			if (!existingBindings) return true;
+			
+			if(existingBindings.value != superClass)
 			{
 				// If the listener was previously added, definitely don't add it again.
 				// But throw an exception if their once values differ.
@@ -368,18 +420,23 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
-		protected function createDynamicClass(name:QualifiedName, base:Type) : DynamicClass
+		protected function createDynamicClass(	name : QualifiedName, 
+												base : Type, 
+												superType : Type
+												) : DynamicClass
 		{
 			const interfaces : Array = base.getInterfaces();
 			const mixins : Dictionary = new Dictionary();
 			
-			for each(var type : Type in interfaces)
+			const total : int = interfaces.length;
+			for(var i : int = 0; i<total; i++)
 			{
+				const type : Type = interfaces[i];
 				const binding : IMixinBinding = bindings.find(type.classDefinition);
 				if(null != binding)
 				{
 					if(!binding.ignore) 
-						mixins[type] = binding.implementation;
+						mixins[type] = binding.value;
 				}
 				else
 				{
@@ -388,7 +445,7 @@ package org.osflash.mixins
 				}
 			}
 						
-			return mixinGenerator.generate(name, base, mixins);
+			return mixinGenerator.generate(name, base, superType, mixins);
 		}
 	}
 }
