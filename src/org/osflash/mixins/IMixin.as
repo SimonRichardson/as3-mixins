@@ -60,7 +60,5 @@ package org.osflash.mixins
 		 * Unsubscribes all observers and implementations from the mixin.
 		 */
 		function removeAll() : void;
-		
-		
 	}
 }

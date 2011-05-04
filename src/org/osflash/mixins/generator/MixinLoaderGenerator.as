@@ -49,17 +49,24 @@ package org.osflash.mixins.generator
 		private const _loader : Loader = new Loader();
 		
 		/**
-		 * 
+		 * @private
 		 */
-		public function MixinLoaderGenerator(layout : IByteCodeLayout, domain : ApplicationDomain)
+		private const _header : SWFHeader = new SWFHeader(SWF_HEARDER_TYPE);
+		
+		/**
+		 * @private
+		 */
+		private const _writer : SWFWriter = new SWFWriter();
+						
+		/**
+		 * Load the bytecode in to the aync Loader for the execution.
+		 */
+		public function load(layout : IByteCodeLayout, domain : ApplicationDomain) : void
 		{
 			_layout = layout;
 			_domain = domain;
-			
-			const header : SWFHeader = new SWFHeader(SWF_HEARDER_TYPE);
-			const swfWriter : SWFWriter = new SWFWriter();
-			
-			swfWriter.write(_buffer, header, Vector.<ITag>([
+						
+			_writer.write(_buffer, _header, Vector.<ITag>([
 					new FileAttributesTag(false, false, false, true, true),
 					new ScriptLimitsTag(),
 					new SetBackgroundColorTag(0xFF, 0x0, 0x0),
@@ -70,25 +77,39 @@ package org.osflash.mixins.generator
 			]));
 			
 			_buffer.position = 0;
-		}
-				
-		/**
-		 * Load the bytecode in to the aync Loader for the execution.
-		 */
-		public function load() : void
-		{
+			
 			// Add the loader context
 			const loaderContext:LoaderContext = new LoaderContext(false, _domain);
 			enableAIRDynamicExecution(loaderContext);
-			
-			// used for testing.
-			// new FileReference().save(_buffer, "dump.swf");
 			
 			// Loader the buffer to the loaded bytes
 			_loader.loadBytes(_buffer, loaderContext);
 			
 			_buffer.position = 0;
 			_buffer.length = 0;
+		}
+		
+		/**
+		 * Dispose the current loader and buffer
+		 */
+		public function dispose() : void
+		{
+			_domain = null;
+			
+			_buffer.position = 0;
+			_buffer.length = 0;
+			
+			if(null != _layout)
+			{
+				_layout.dispose();
+				_layout = null;
+			}
+			
+			try
+			{
+				_loader.unloadAndStop(true);	
+			}
+			catch(error : Error) {};
 		}
 		
 		/**

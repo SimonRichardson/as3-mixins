@@ -77,13 +77,25 @@ package org.osflash.mixins.generator
 			const loaderInfo : LoaderInfo = _loader.contentLoaderInfo;
 			
 			_loaderCompletedSignal = new NativeSignal(loaderInfo, Event.COMPLETE, Event);
-			_loaderCompletedSignal.add(handleLoaderCompletedSignal);
+			_loaderCompletedSignal.addOnce(handleLoaderCompletedSignal);
 			
 			_loaderIOErrorSignal = new NativeSignal(loaderInfo, IOErrorEvent.IO_ERROR, IOErrorEvent);
-			_loaderIOErrorSignal.add(handleLoaderErrorSignal);
+			_loaderIOErrorSignal.addOnce(handleLoaderErrorSignal);
 			
 			_loaderErrorSignal = new NativeSignal(loaderInfo, ErrorEvent.ERROR, ErrorEvent);
-			_loaderErrorSignal.add(handleLoaderErrorSignal);
+			_loaderErrorSignal.addOnce(handleLoaderErrorSignal);
+		}
+		
+		public function dispose() : void
+		{
+			_loaderCompletedSignal.removeAll();
+			_loaderCompletedSignal = null;
+			
+			_loaderIOErrorSignal.removeAll();
+			_loaderIOErrorSignal = null;
+			
+			_loaderErrorSignal.removeAll();
+			_loaderErrorSignal = null;
 		}
 
 		/**

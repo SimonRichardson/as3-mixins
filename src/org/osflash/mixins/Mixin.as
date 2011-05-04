@@ -13,7 +13,6 @@ package org.osflash.mixins
 	import org.osflash.mixins.generator.MixinGenerator;
 	import org.osflash.mixins.generator.MixinLoaderGenerator;
 	import org.osflash.mixins.generator.MixinQualifiedName;
-	import org.osflash.signals.ISignal;
 
 	import flash.errors.IllegalOperationError;
 	import flash.system.ApplicationDomain;
@@ -53,12 +52,17 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
-		protected const generators : Vector.<MixinGenerator> = new Vector.<MixinGenerator>();
-					
+		protected const mixinGenerator : MixinGenerator = new MixinGenerator();
+		
 		/**
 		 * @private
 		 */
-		protected var loaderCompletedSignal : ISignal;
+		protected const mixinLoader : MixinLoaderGenerator = new MixinLoaderGenerator();
+				
+		/**
+		 * @private
+		 */
+		protected var mixinSignals : MixinGenerationSignals;
 		
 		/**
 		 * 
@@ -151,13 +155,7 @@ package org.osflash.mixins
 				classes[implementation] = generatedClass;
 			}
 			
-			// Clean up the generators here.
-			var index : int = generators.length;
-			while(--index > -1)
-			{
-				const generator : MixinGenerator = generators.pop();
-				generator.dispose();
-			}
+			mixinGenerator.dispose();
 		}
 		
 		/**
@@ -274,6 +272,7 @@ package org.osflash.mixins
 				definitions.pop();
 			}
 			*/
+			
 			cleanup();
 		}
 		
@@ -293,11 +292,13 @@ package org.osflash.mixins
 			for(key in dynamicClasses)
 				delete dynamicClasses[key];
 				
-			var index : int = generators.length;
-			while(--index > -1)
+			mixinGenerator.dispose();
+			mixinLoader.dispose();
+			
+			if(null != mixinSignals)
 			{
-				const generator : MixinGenerator = generators.pop();
-				generator.dispose();
+				mixinSignals.dispose();
+				mixinSignals = null;
 			}
 		}
 		
@@ -347,18 +348,13 @@ package org.osflash.mixins
 			// Set the current application domain.
 			const loaderDomain : ApplicationDomain = getApplicationDomain();
 			
-			// Create the loader			
-			const mixinLoader : MixinLoaderGenerator = new MixinLoaderGenerator(	layout, 
-																					loaderDomain
-																					);
-			
 			// Using the signals generate loader feedback
-			const signals : MixinGenerationSignals = new MixinGenerationSignals(this, mixinLoader);
+			mixinSignals = new MixinGenerationSignals(this, mixinLoader);
 			
-			// Load the bytes
-			mixinLoader.load();
+			// Create the loader			
+			mixinLoader.load(layout, loaderDomain);						
 			
-			return signals;
+			return mixinSignals;
 		}
 				
 		/**
@@ -391,12 +387,7 @@ package org.osflash.mixins
 											'has not being defined'); 
 				}
 			}
-			
-			// Make a new generator every time, so that we can then dispose of them.
-			const mixinGenerator : MixinGenerator = new MixinGenerator();
-			
-			generators.push(mixinGenerator);
-			
+						
 			return mixinGenerator.generate(name, base, mixins);
 		}
 	}
