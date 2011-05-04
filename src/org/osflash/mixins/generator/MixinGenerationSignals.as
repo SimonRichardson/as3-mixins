@@ -105,13 +105,9 @@ package org.osflash.mixins.generator
 		private function handleLoaderErrorSignal(event : ErrorEvent) : void
 		{
 			if(event is IOErrorEvent)
-			{
 				errorSignal.dispatch(mixin, MixinError.IO_ERROR);
-			}
 			else
-			{
 				errorSignal.dispatch(mixin, MixinError.ERROR);
-			}	
 		}
 		
 		/**

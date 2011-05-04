@@ -49,12 +49,12 @@ package org.osflash.mixins
 		 * @private
 		 */		
 		protected const generatedNames : Dictionary = new Dictionary();
-				
+		
 		/**
 		 * @private
 		 */
-		protected const mixinGenerator : MixinGenerator = new MixinGenerator();
-		
+		protected const generators : Vector.<MixinGenerator> = new Vector.<MixinGenerator>();
+					
 		/**
 		 * @private
 		 */
@@ -150,6 +150,14 @@ package org.osflash.mixins
 					
 				classes[implementation] = generatedClass;
 			}
+			
+			// Clean up the generators here.
+			var index : int = generators.length;
+			while(--index > -1)
+			{
+				const generator : MixinGenerator = generators.pop();
+				generator.dispose();
+			}
 		}
 		
 		/**
@@ -179,7 +187,7 @@ package org.osflash.mixins
 			var paramName : String;
 			
 			// Parse them for the constructor.				
-			var argumentValues : Array = [];
+			var argumentValues : Array;
 			if(null != args)
 			{
 				// Find how many arguments there are.			
@@ -194,6 +202,8 @@ package org.osflash.mixins
 					throw MixinError.CONSTRUCTOR_ARGUMENT_MISMATCH;
 				else
 				{
+					argumentValues = [];
+					
 					for (i = 0; i < paramsTotal; i++)
 					{
 						param = params[i];
@@ -207,10 +217,21 @@ package org.osflash.mixins
 						else
 							argumentValues.push(null);
 					}
+					
+					// hot path through
+					if(argumentValues.length == 0)
+						return ClassUtility.createClass(definition);
 				}
 			}
 			else
 			{
+				// hot path through
+				if(paramsTotal == 0)
+					return ClassUtility.createClass(definition);
+				
+				argumentValues = [];
+				
+				// normal creation
 				for (i = 0; i < paramsTotal; i++)
 				{
 					param = params[i];
@@ -224,6 +245,7 @@ package org.osflash.mixins
 				}
 			}
 			
+			// generate the class with the required argument values.
 			return ClassUtility.createClass(definition, argumentValues);
 		}
 		
@@ -270,6 +292,13 @@ package org.osflash.mixins
 				
 			for(key in dynamicClasses)
 				delete dynamicClasses[key];
+				
+			var index : int = generators.length;
+			while(--index > -1)
+			{
+				const generator : MixinGenerator = generators.pop();
+				generator.dispose();
+			}
 		}
 		
 		/**
@@ -362,6 +391,11 @@ package org.osflash.mixins
 											'has not being defined'); 
 				}
 			}
+			
+			// Make a new generator every time, so that we can then dispose of them.
+			const mixinGenerator : MixinGenerator = new MixinGenerator();
+			
+			generators.push(mixinGenerator);
 			
 			return mixinGenerator.generate(name, base, mixins);
 		}

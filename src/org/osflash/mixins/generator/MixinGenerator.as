@@ -49,6 +49,14 @@ package org.osflash.mixins.generator
 			
 			return dynamicClass;
 		}
+				
+		/**
+		 * Dispose the current generator.
+		 */
+		public function dispose() : void
+		{
+			
+		}
 		
 		/**
 		 * @private
@@ -109,7 +117,6 @@ package org.osflash.mixins.generator
 				instructions.push([Instructions.ConstructProp, implType.qname, 0]);
 				instructions.push([Instructions.InitProperty, descriptorTypeName]);
 				
-				// TODO : Add the 'if' check for the arguments 
 				const properties : Array = descriptorType.getProperties();
 				const total : int = properties.length;
 				for(var i : int = 0; i<total; i++)
@@ -419,5 +426,6 @@ package org.osflash.mixins.generator
 					]);
 			
 		}
+		
 	}
 }
