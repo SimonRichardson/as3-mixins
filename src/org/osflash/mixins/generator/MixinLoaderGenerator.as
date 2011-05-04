@@ -7,6 +7,7 @@ package org.osflash.mixins.generator
 	import org.flemit.tags.EndTag;
 	import org.flemit.tags.FileAttributesTag;
 	import org.flemit.tags.FrameLabelTag;
+	import org.flemit.tags.ITag;
 	import org.flemit.tags.ScriptLimitsTag;
 	import org.flemit.tags.SetBackgroundColorTag;
 	import org.flemit.tags.ShowFrameTag;
@@ -55,18 +56,18 @@ package org.osflash.mixins.generator
 			_layout = layout;
 			_domain = domain;
 			
-			const header:SWFHeader = new SWFHeader(SWF_HEARDER_TYPE);
-			const swfWriter:SWFWriter = new SWFWriter();
-				
-			swfWriter.write(_buffer, header, [
-					FileAttributesTag.create(false, false, false, true, true),
+			const header : SWFHeader = new SWFHeader(SWF_HEARDER_TYPE);
+			const swfWriter : SWFWriter = new SWFWriter();
+			
+			swfWriter.write(_buffer, header, Vector.<ITag>([
+					new FileAttributesTag(false, false, false, true, true),
 					new ScriptLimitsTag(),
 					new SetBackgroundColorTag(0xFF, 0x0, 0x0),
 					new FrameLabelTag("MixinFrameLabel"),
-					new DoABCTag(false, "MixinGenerated", _layout),
+					new DoABCTag("MixinGenerated", _layout),
 					new ShowFrameTag(),
 					new EndTag()
-			]);
+			]));
 			
 			_buffer.position = 0;
 		}

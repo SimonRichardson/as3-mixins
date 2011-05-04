@@ -221,7 +221,7 @@ package org.osflash.mixins.generator
 						const methodPropertyName : QualifiedName = buildProxyPropName(	methodNS, 
 																						definition
 																						);
-						if(!dynamicClass.getField(methodPropertyName.name))
+						if(!dynamicClass.getField(methodPropertyName.name, ''))
 						{
 							dynamicClass.addSlot(new FieldInfo(	dynamicClass, 
 																methodPropertyName.name, 
@@ -265,7 +265,7 @@ package org.osflash.mixins.generator
 																						definition
 																						);
 						
-						if(!dynamicClass.getField(proxyPropertyName.name))
+						if(!dynamicClass.getField(proxyPropertyName.name, ''))
 						{
 							dynamicClass.addSlot(new FieldInfo(	dynamicClass, 
 																proxyPropertyName.name, 
