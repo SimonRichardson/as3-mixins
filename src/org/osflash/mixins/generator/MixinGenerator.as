@@ -204,6 +204,8 @@ package org.osflash.mixins.generator
 				[Instructions.ReturnVoid]
 			);
 			
+			// TODO : work out the injectables here.
+			
 			// Finish off the init method
 			const argumentBytes : int = proxies * 9;
 			dynamicClass.addMethod(method);
