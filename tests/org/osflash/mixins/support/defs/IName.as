@@ -5,6 +5,6 @@ package org.osflash.mixins.support.defs
 	 */
 	public interface IName
 	{
-		function getName() : String;
+		function toString() : String;
 	}
 }

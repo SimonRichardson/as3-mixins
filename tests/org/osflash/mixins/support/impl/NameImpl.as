@@ -1,14 +1,15 @@
 package org.osflash.mixins.support.impl
 {
-	import flash.utils.getQualifiedClassName;
 	import org.osflash.mixins.support.defs.IName;
+
+	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
 	public class NameImpl implements IName
 	{
 		
-		public function getName() : String
+		public function toString() : String
 		{
 			const qname : String = getQualifiedClassName(this);
 			const parts : Array = qname.split("::");

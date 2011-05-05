@@ -1,5 +1,6 @@
 package org.osflash.mixins.generator
 {
+	import flash.utils.getDefinitionByName;
 	import org.flemit.bytecode.BCNamespace;
 	import org.flemit.bytecode.DynamicClass;
 	import org.flemit.bytecode.DynamicMethod;
@@ -34,7 +35,7 @@ package org.osflash.mixins.generator
 			const interfaces : Array = [base].concat(base.getInterfaces());			
 			const dynamicClass : DynamicClass = new DynamicClass(name, superType, interfaces);
 			
-			addInterfaceMembers(dynamicClass);
+			addInterfaceMembers(dynamicClass, superType);
 			
 			dynamicClass.constructor = createConstructor(dynamicClass);
 			
@@ -272,16 +273,59 @@ package org.osflash.mixins.generator
 			return new QualifiedName(ns, propertyName);
 		}
 		
+		private function getMethods(superType : Type) : Dictionary
+		{
+			const methodNames : Dictionary = new Dictionary();
+			if(null == superType.baseType) return methodNames;
+			
+			const methods : Array = superType.baseType.getMethods(false, true, true);
+			const total : int = methods.length;
+			for(var i : int = 0; i<total; i++)
+			{
+				const method : MethodInfo = methods[i];
+				const methodName : String = method.name;
+				methodNames[methodName] = methodName;
+			}
+			
+			return methodNames;
+		}
+				
+		private function getProperties(superType : Type) : Dictionary
+		{
+			const propertyNames : Dictionary = new Dictionary();
+			if(null == superType.baseType) return propertyNames;
+			
+			const properties : Array = superType.baseType.getProperties(false, true, true);
+			const total : int = properties.length;
+			for(var i : int = 0; i<total; i++)
+			{
+				const property : PropertyInfo = properties[i];
+				const propertyName : String = property.name;
+				getDefinitionByName('trace')(propertyName);
+				propertyNames[propertyName] = propertyName;
+			}
+			
+			return propertyNames;
+		}
+		
 		/**
 		 * @private
 		 */
-		private function addInterfaceMembers(dynamicClass : DynamicClass) : void
+		private function addInterfaceMembers(dynamicClass : DynamicClass, superType : Type) : void
 		{
 			const definitions : Array = dynamicClass.getInterfaces();
 			
+			const isObject : Boolean = superType.name == "Object";
+			
+			if(!isObject)
+			{
+				const methodNames : Dictionary = getMethods(superType);
+				const propertyNames : Dictionary = getProperties(superType);
+			}
+			
+			
 			var i : int;
 			var total : int;
-			
 			for each(var definition : Type in definitions)
 			{
 				const definitionInterfaces : Array = definition.getInterfaces();
@@ -302,12 +346,16 @@ package org.osflash.mixins.generator
 					const method : MethodInfo = definitionMethods[i];
 					if(null == dynamicClass.getMethod(method.name))
 					{
+						const overrideMethod : Boolean = isObject 
+															? false 
+															: (null != methodNames[method.name]);
+						
 						const classMethod : MethodInfo = new MethodInfo(	dynamicClass, 
 																			method.name, 
 																			null, 
 																			method.visibility, 
 																			method.isStatic, 
-																			false, 
+																			overrideMethod, 
 																			method.returnType, 
 																			method.parameters
 																			);
@@ -350,12 +398,16 @@ package org.osflash.mixins.generator
 					const property : PropertyInfo = definitionProperties[i];
 					if(null == dynamicClass.getProperty(property.name))
 					{
+						const overrideProperty : Boolean = isObject
+														? false
+														: (null != propertyNames[property.name]);
+						
 						const classProperty : PropertyInfo = new PropertyInfo(	dynamicClass, 
 																				property.name, 
 																				null, 
 																				property.visibility, 
 																				property.isStatic, 
-																				false, 
+																				overrideProperty, 
 																				property.type, 
 																				property.canRead, 
 																				property.canWrite

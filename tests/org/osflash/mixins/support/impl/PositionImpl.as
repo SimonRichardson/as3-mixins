@@ -7,9 +7,9 @@ package org.osflash.mixins.support.impl
 	public final class PositionImpl implements IPosition
 	{
 		
-		private var _x : int;
+		private var _x : Number;
 		
-		private var _y : int;
+		private var _y : Number;
 
 		public function PositionImpl()
 		{
@@ -17,22 +17,22 @@ package org.osflash.mixins.support.impl
 			_y = 0;
 		}
 		
-		public function get x() : int
+		public function get x() : Number
 		{
 			return _x;
 		}
 
-		public function set x(value : int) : void
+		public function set x(value : Number) : void
 		{
 			_x = value;
 		}
 
-		public function get y() : int
+		public function get y() : Number
 		{
 			return _y;
 		}
 
-		public function set y(value : int) : void
+		public function set y(value : Number) : void
 		{
 			_y = value;
 		}

@@ -1,6 +1,7 @@
 package org.osflash.mixins
 {
 	import asunit.asserts.assertEquals;
+	import asunit.asserts.assertFalse;
 	import asunit.asserts.assertNotNull;
 	import asunit.asserts.assertTrue;
 	import asunit.asserts.fail;
@@ -97,7 +98,7 @@ package org.osflash.mixins
 																	y:99
 																	});
 			
-			assertEquals('Property regular should be false', false, squareImpl.regular);
+			assertFalse('Property regular should be false', squareImpl.regular);
 			assertEquals('Property width should be 100', 100, squareImpl.width);
 			assertEquals('Property height should be 205', 205, squareImpl.height);
 			assertEquals('Property x should be 25', 25, squareImpl.x);

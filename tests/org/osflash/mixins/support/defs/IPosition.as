@@ -6,12 +6,12 @@ package org.osflash.mixins.support.defs
 	public interface IPosition
 	{
 		
-		function get x() : int;
+		function get x() : Number;
 		
-		function set x(value : int) : void;
+		function set x(value : Number) : void;
 		
-		function get y() : int;
+		function get y() : Number;
 		
-		function set y(value : int) : void;
+		function set y(value : Number) : void;
 	}
 }
