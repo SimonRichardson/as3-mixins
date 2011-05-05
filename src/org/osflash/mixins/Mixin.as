@@ -255,8 +255,8 @@ package org.osflash.mixins
 						if (args.hasOwnProperty(paramName))
 							argumentValues.push(args[paramName]);
 						else if (param.optional == false)
-							throw new ArgumentError('The argument map did not contain an entry for "' + 
-													paramName + '" and this parameter is not optional');
+							throw new ArgumentError('The argument map did not contain an entry ' +
+									'for "' + paramName + '" and this parameter is not optional');
 						else
 							argumentValues.push(null);
 					}

@@ -1,6 +1,5 @@
 package org.osflash.mixins.generator
 {
-	import flash.utils.getDefinitionByName;
 	import org.flemit.bytecode.BCNamespace;
 	import org.flemit.bytecode.DynamicClass;
 	import org.flemit.bytecode.DynamicMethod;
@@ -10,6 +9,7 @@ package org.osflash.mixins.generator
 	import org.flemit.bytecode.NamespaceSet;
 	import org.flemit.bytecode.QualifiedName;
 	import org.flemit.reflection.FieldInfo;
+	import org.flemit.reflection.MemberInfo;
 	import org.flemit.reflection.MemberVisibility;
 	import org.flemit.reflection.MethodInfo;
 	import org.flemit.reflection.ParameterInfo;
@@ -46,7 +46,12 @@ package org.osflash.mixins.generator
 										generateStaticInitialiser(dynamicClass)
 										);
 			dynamicClass.addMethodBody(	dynamicClass.constructor, 
-										generateInitialiser(dynamicClass, mixins, base, injectors)
+										generateInitialiser(	dynamicClass, 
+																mixins, 
+																base, 
+																superType, 
+																injectors
+																)
 										);
 						
 			return dynamicClass;
@@ -92,6 +97,7 @@ package org.osflash.mixins.generator
 		protected function generateInitialiser(	dynamicClass : DynamicClass, 
 												mixins : Dictionary,
 												base : Type,
+												superType : Type,
 												injectors : Dictionary
 												) : DynamicMethod
 		{
@@ -117,7 +123,8 @@ package org.osflash.mixins.generator
 			// create the __init__ method 
 			const initMethod : MethodInfo = generateInitMethod(	dynamicClass, 
 																mixins, 
-																base, 
+																base,
+																superType,
 																injectors
 																);
 			// Finish the constructor
@@ -142,6 +149,7 @@ package org.osflash.mixins.generator
 		protected function generateInitMethod(	dynamicClass : DynamicClass,
 												mixins : Dictionary,
 												base : Type,
+												superType : Type,
 												injectors : Dictionary
 												) : MethodInfo
 		{
@@ -160,9 +168,10 @@ package org.osflash.mixins.generator
 				params.push(new ParameterInfo(propertyInfo.name, propertyInfo.type, true));
 			}
 			
+			const initMethodName : String = "___init___";
 			const ns : BCNamespace = new BCNamespace('', NamespaceKind.PACKAGE_NAMESPACE);
 			const method : MethodInfo = new MethodInfo(	dynamicClass, 
-														"__init__", 
+														initMethodName, 
 														null, 
 														MemberVisibility.PUBLIC, 
 														false, 
@@ -232,6 +241,18 @@ package org.osflash.mixins.generator
 				}
 			}
 			
+//			const isObject : Boolean = superType.name == "Object";
+//			
+//			if(!isObject)
+//			{
+//				const methodNames : Dictionary = getMethods(superType);
+//				const initMethid
+//				if(methodNames["__init__"])
+//				{
+//					
+//				}
+//			}
+			
 			// Return void, we've finished.			
 			instructions.push(
 				[Instructions.ReturnVoid]
@@ -273,12 +294,29 @@ package org.osflash.mixins.generator
 			return new QualifiedName(ns, propertyName);
 		}
 		
+		private function getMembers(superType : Type) : Dictionary
+		{
+			const memberNames : Dictionary = new Dictionary();
+			if(null == superType) return memberNames;
+			
+			const members : Array = superType.getMembers(false, true, true);
+			const total : int = members.length;
+			for(var i : int = 0; i<total; i++)
+			{
+				const member : MemberInfo = members[i];
+				const memberName : String = member.name;
+				memberNames[memberName] = memberName;
+			}
+			
+			return memberNames;
+		}
+		
 		private function getMethods(superType : Type) : Dictionary
 		{
 			const methodNames : Dictionary = new Dictionary();
-			if(null == superType.baseType) return methodNames;
+			if(null == superType) return methodNames;
 			
-			const methods : Array = superType.baseType.getMethods(false, true, true);
+			const methods : Array = superType.getMethods(false, true, true);
 			const total : int = methods.length;
 			for(var i : int = 0; i<total; i++)
 			{
@@ -293,15 +331,14 @@ package org.osflash.mixins.generator
 		private function getProperties(superType : Type) : Dictionary
 		{
 			const propertyNames : Dictionary = new Dictionary();
-			if(null == superType.baseType) return propertyNames;
+			if(null == superType) return propertyNames;
 			
-			const properties : Array = superType.baseType.getProperties(false, true, true);
+			const properties : Array = superType.getProperties(false, true, true);
 			const total : int = properties.length;
 			for(var i : int = 0; i<total; i++)
 			{
 				const property : PropertyInfo = properties[i];
 				const propertyName : String = property.name;
-				getDefinitionByName('trace')(propertyName);
 				propertyNames[propertyName] = propertyName;
 			}
 			
