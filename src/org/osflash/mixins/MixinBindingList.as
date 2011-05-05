@@ -20,7 +20,7 @@ package org.osflash.mixins
 		 *
 		 * <p>A user never has to create a MixinBindingList manually. Use the <code>NIL</code> 
 		 * element to represent an empty list. <code>NIL.prepend(value)</code> would create a list 
-		 * containing <code>value</code>.
+		 * containing <code>value</code>.</p>
 		 *
 		 * @param head The head of the list.
 		 * @param tail The tail of the list.
