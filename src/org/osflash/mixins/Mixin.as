@@ -144,7 +144,7 @@ package org.osflash.mixins
 					for each(var variable : XML in variables)
 					{
 						const variableName : String = variable.@name;
-						const variableType : String = variable.@type;
+						const variableType : String = String(variable.@type).replace(/::/, ":");
 						
 						if(variableType == type.qname.toString())
 						{
@@ -152,7 +152,10 @@ package org.osflash.mixins
 						}
 						else
 						{
-							throw new IllegalOperationError("Unable to Inject");
+							// TODO : inject bindings here
+							// TODO : This should look through the dynamic classes interfaces and find them
+							throw new IllegalOperationError('Unable to inject type (' + 
+											variableType + ') into variable (' + variable + ')');
 						}
 					}
 				}
@@ -472,7 +475,7 @@ package org.osflash.mixins
 				}
 			}
 						
-			return mixinGenerator.generate(name, base, superType, mixins);
+			return mixinGenerator.generate(name, base, superType, mixins, injectors);
 		}
 	}
 }

@@ -16,6 +16,7 @@ package org.osflash.mixins.generator
 	import org.flemit.reflection.Type;
 	import org.osflash.mixins.MixinError;
 
+	import flash.errors.IllegalOperationError;
 	import flash.utils.Dictionary;
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
@@ -26,7 +27,8 @@ package org.osflash.mixins.generator
 		public function generate(	name : QualifiedName, 
 									base : Type,
 									superType : Type,
-									mixins : Dictionary
+									mixins : Dictionary,
+									injectors : Dictionary
 								) : DynamicClass
 		{			
 			const interfaces : Array = [base].concat(base.getInterfaces());			
@@ -43,7 +45,7 @@ package org.osflash.mixins.generator
 										generateStaticInitialiser(dynamicClass)
 										);
 			dynamicClass.addMethodBody(	dynamicClass.constructor, 
-										generateInitialiser(dynamicClass, mixins)
+										generateInitialiser(dynamicClass, mixins, base, injectors)
 										);
 						
 			return dynamicClass;
@@ -87,7 +89,9 @@ package org.osflash.mixins.generator
 		 * @private
 		 */
 		protected function generateInitialiser(	dynamicClass : DynamicClass, 
-												mixins : Dictionary
+												mixins : Dictionary,
+												base : Type,
+												injectors : Dictionary
 												) : DynamicMethod
 		{
 			const baseConstructor : MethodInfo = dynamicClass.baseType.constructor;
@@ -110,7 +114,11 @@ package org.osflash.mixins.generator
 			}
 			
 			// create the __init__ method 
-			const initMethod : MethodInfo = generateInitMethod(dynamicClass, mixins);
+			const initMethod : MethodInfo = generateInitMethod(	dynamicClass, 
+																mixins, 
+																base, 
+																injectors
+																);
 			// Finish the constructor
 			instructions.push(
 				[Instructions.CallPropVoid, initMethod.qname, constructorArgCount],
@@ -131,7 +139,9 @@ package org.osflash.mixins.generator
 		 * @private
 		 */
 		protected function generateInitMethod(	dynamicClass : DynamicClass,
-												mixins : Dictionary
+												mixins : Dictionary,
+												base : Type,
+												injectors : Dictionary
 												) : MethodInfo
 		{
 			var i : int;
@@ -200,11 +210,32 @@ package org.osflash.mixins.generator
 				proxies++;
 			}
 			
+			for(var variable : String in injectors)
+			{
+				const variableType : Type = injectors[variable];
+				if(variableType.qname.toString() == base.qname.toString())
+				{
+					// This wanting a reference to it's self.
+					const self : QualifiedName = buildPropName(ns, variable);
+					instructions.push(
+						[Instructions.GetLocal_0],
+						[Instructions.GetLocal_0],
+						[Instructions.SetSuper, self]
+					);
+				}
+				else
+				{
+					// TODO : This should look through the dynamic classes interfaces and find them
+					throw new IllegalOperationError('Unable to inject type (' + variableType.name +
+													') into variable (' + variable + ')');
+				}
+			}
+			
+			// Return void, we've finished.			
 			instructions.push(
 				[Instructions.ReturnVoid]
 			);
 			
-			// TODO : work out the injectables here.
 			
 			// Finish off the init method
 			const argumentBytes : int = proxies * 9;
