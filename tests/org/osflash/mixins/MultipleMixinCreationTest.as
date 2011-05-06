@@ -4,7 +4,7 @@ package org.osflash.mixins
 	import asunit.framework.IAsync;
 
 	import org.osflash.mixins.generator.MixinLoader;
-	import org.osflash.mixins.generator.MixinLoaderSignals;
+	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 	import org.osflash.mixins.support.ICircle;
 	import org.osflash.mixins.support.ISquare;
 	import org.osflash.mixins.support.defs.IName;
@@ -16,6 +16,7 @@ package org.osflash.mixins
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.RadiusImpl;
 	import org.osflash.mixins.support.impl.SizeImpl;
+
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -64,12 +65,12 @@ package org.osflash.mixins
 			loader.add(mixin0);
 			loader.add(mixin1);
 			
-			const signals : MixinLoaderSignals = loader.load();
+			const signals : IMixinLoaderSignals = loader.load();
 			signals.completedSignal.add(async.add(handleCompletedSignal, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
 		
-		private function handleCompletedSignal() : void
+		private function handleCompletedSignal(mixins : Vector.<IMixin>) : void
 		{
 			
 		}

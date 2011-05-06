@@ -1,11 +1,5 @@
-package org.osflash.mixins.generator
+package org.osflash.mixins.generator.signals
 {
-	import org.osflash.mixins.IMixin;
-	import org.osflash.mixins.MixinError;
-	import org.osflash.signals.ISignal;
-	import org.osflash.signals.Signal;
-	import org.osflash.signals.natives.NativeSignal;
-
 	import flash.display.Loader;
 	import flash.display.LoaderInfo;
 	import flash.errors.IllegalOperationError;
@@ -13,10 +7,17 @@ package org.osflash.mixins.generator
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.system.ApplicationDomain;
+	import org.osflash.mixins.IMixin;
+	import org.osflash.mixins.MixinError;
+	import org.osflash.mixins.generator.IMixinLoader;
+	import org.osflash.signals.ISignal;
+	import org.osflash.signals.Signal;
+	import org.osflash.signals.natives.NativeSignal;
+
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class MixinLoaderSignals implements IMixinLoaderSignals
+	public class MultipleMixinLoaderSignals implements IMixinLoaderSignals
 	{
 		
 		/**
@@ -61,7 +62,7 @@ package org.osflash.mixins.generator
 		
 		/**
 		 */
-		public function MixinLoaderSignals(mixins : Vector.<IMixin>, generator : IMixinLoader)
+		public function MultipleMixinLoaderSignals(mixins : Vector.<IMixin>, generator : IMixinLoader)
 		{
 			if(null == mixins) throw new ArgumentError('Given Vector.<IMixin> can not be null');
 			if(null == generator) throw new ArgumentError('Given IMixinLoader can not be null');
@@ -105,9 +106,13 @@ package org.osflash.mixins.generator
 			const loaderInfo : LoaderInfo = _loader.contentLoaderInfo;
 			const domain : ApplicationDomain = loaderInfo.applicationDomain;
 			
-			//mixin.inject(domain);
+			var index : int = _mixins.length;
+			while(--index > -1)
+			{
+				_mixins[index].inject(domain);
+			}
 			
-			//completedSignal.dispatch(_mixin);
+			completedSignal.dispatch(_mixins);
 		}
 				
 		/**
@@ -115,13 +120,10 @@ package org.osflash.mixins.generator
 		 */
 		private function handleLoaderErrorSignal(event : ErrorEvent) : void
 		{
-			/*
 			if(event is IOErrorEvent)
-				errorSignal.dispatch(mixin, MixinError.IO_ERROR);
+				errorSignal.dispatch(_mixins, MixinError.IO_ERROR);
 			else
-				errorSignal.dispatch(mixin, MixinError.ERROR);
-				 * 
-				 */
+				errorSignal.dispatch(_mixins, MixinError.ERROR);
 		}
 		
 		/**

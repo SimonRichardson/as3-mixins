@@ -1,8 +1,8 @@
 package org.osflash.mixins
 {
-	import org.osflash.mixins.generator.IMixinLoaderSignals;
-
 	import flash.system.ApplicationDomain;
+	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
+
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */

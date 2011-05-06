@@ -1,4 +1,4 @@
-package org.osflash.mixins.generator
+package org.osflash.mixins.generator.signals
 {
 	import org.osflash.signals.ISignal;
 	/**

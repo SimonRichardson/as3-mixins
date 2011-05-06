@@ -1,5 +1,6 @@
 package org.osflash.mixins.generator
 {
+	import flash.utils.getDefinitionByName;
 	import org.flemit.bytecode.BCNamespace;
 	import org.flemit.bytecode.DynamicClass;
 	import org.flemit.bytecode.DynamicMethod;
@@ -11,6 +12,7 @@ package org.osflash.mixins.generator
 	import org.flemit.reflection.FieldInfo;
 	import org.flemit.reflection.MemberInfo;
 	import org.flemit.reflection.MemberVisibility;
+	import org.flemit.reflection.MetadataInfo;
 	import org.flemit.reflection.MethodInfo;
 	import org.flemit.reflection.ParameterInfo;
 	import org.flemit.reflection.PropertyInfo;
@@ -36,7 +38,8 @@ package org.osflash.mixins.generator
 			const dynamicClass : DynamicClass = new DynamicClass(name, superType, interfaces);
 			
 			addInterfaceMembers(dynamicClass, superType);
-			
+			addMetaData(dynamicClass, name);
+									
 			dynamicClass.constructor = createConstructor(dynamicClass);
 			
 			dynamicClass.addMethodBody(	dynamicClass.scriptInitialiser, 
@@ -495,6 +498,17 @@ package org.osflash.mixins.generator
 					}
 				}
 			}
+		}
+		
+		/**
+		 * @private
+		 */
+		private function addMetaData(dynamicClass : DynamicClass, qname : QualifiedName) : void
+		{
+			const parameters : Dictionary = new Dictionary();
+			parameters['extraClass'] = qname.toString();
+			
+			dynamicClass.addMetadata(new MetadataInfo('Frame', parameters));
 		}
 		
 		/**

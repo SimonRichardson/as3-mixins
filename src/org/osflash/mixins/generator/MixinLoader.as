@@ -1,5 +1,14 @@
 package org.osflash.mixins.generator
 {
+	import flash.utils.getDefinitionByName;
+	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
+	import org.osflash.mixins.generator.signals.SingleMixinLoaderSignals;
+	import flash.display.Loader;
+	import flash.errors.IllegalOperationError;
+	import flash.net.FileReference;
+	import flash.system.ApplicationDomain;
+	import flash.system.LoaderContext;
+	import flash.utils.ByteArray;
 	import org.flemit.SWFHeader;
 	import org.flemit.SWFWriter;
 	import org.flemit.bytecode.IByteCodeLayout;
@@ -12,14 +21,10 @@ package org.osflash.mixins.generator
 	import org.flemit.tags.SetBackgroundColorTag;
 	import org.flemit.tags.ShowFrameTag;
 	import org.osflash.mixins.IMixin;
+	import org.osflash.mixins.generator.signals.MultipleMixinLoaderSignals;
 	import org.osflash.mixins.generator.uid.UID;
 	import org.osflash.mixins.mixin_internal;
 
-	import flash.display.Loader;
-	import flash.errors.IllegalOperationError;
-	import flash.system.ApplicationDomain;
-	import flash.system.LoaderContext;
-	import flash.utils.ByteArray;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -72,7 +77,7 @@ package org.osflash.mixins.generator
 		{
 			if(null == mixin) throw new ArgumentError('Given mixin can not be null');
 			
-			if(_mixins.indexOf(mixin) != -1)
+			if(_mixins.indexOf(mixin) == -1)
 				_mixins.push(mixin);
 			else
 				throw new ArgumentError('Given mixin can not be added again, without ' + 
@@ -104,18 +109,18 @@ package org.osflash.mixins.generator
 		/**
 		 * 
 		 */
-		public function load(domain : ApplicationDomain = null) : MixinLoaderSignals
+		public function load(domain : ApplicationDomain = null) : IMixinLoaderSignals
 		{
 			const total : int = _mixins.length;
 			if(total == 0) throw new ArgumentError('No mixins to load, consider adding some.');
 			
 			_domain = null == domain ? ApplicationDomain.currentDomain : domain;
 			
-			// create a writer.
-			const tags : Vector.<ITag> = new Vector.<ITag>();
-			tags[0] = new FileAttributesTag(false, false, false, true, true);
-			tags[1] = new ScriptLimitsTag();
-			tags[2] = new SetBackgroundColorTag(0xFF, 0x0, 0x0);
+			const tags : Vector.<ITag> = Vector.<ITag>([
+									 	new FileAttributesTag(false, false, false, true, true),
+					 					new ScriptLimitsTag(),
+					 					new SetBackgroundColorTag(0xFF, 0x0, 0x0)
+										]);
 			
 			for(var i : int = 0; i<total; i++)
 			{
@@ -124,6 +129,7 @@ package org.osflash.mixins.generator
 				try
 				{
 					const layout : IByteCodeLayout = mixin.mixin_internal::buildByteCodeLayout();
+					// I'm guessing here that I will have to stitch bytearrays together?
 				}
 				catch(error : Error)
 				{
@@ -133,15 +139,20 @@ package org.osflash.mixins.generator
 				
 				_layouts.push(layout);
 				
+				// create a writer.
 				const id : String = UID.create();
-				tags.push(	new FrameLabelTag("MixinFrameLabel" + id),
-							new DoABCTag("MixinGenerated" + id, layout),
-							new ShowFrameTag()
-							);	
+				
+				tags.push(
+					new FrameLabelTag("MixinFrameLabel" + id),
+					new DoABCTag("MixinGenerated" + id, layout)
+				);
+					 
 			}
 			
-			tags.push(new EndTag());
-			
+			tags.push(	new ShowFrameTag(), 
+						new EndTag()
+						);
+				
 			_writer.write(_buffer, _header, tags);
 			
 			_buffer.position = 0;
@@ -150,18 +161,16 @@ package org.osflash.mixins.generator
 			const loaderContext:LoaderContext = new LoaderContext(false, _domain);
 			enableAIRDynamicExecution(loaderContext);
 			
-			//
-			//new FileReference().save(_buffer, "dump.swf");
-			//_buffer.position = 0;
-			//
-			
 			// Loader the buffer to the loaded bytes
 			_loader.loadBytes(_buffer, loaderContext);
 			
 			_buffer.position = 0;
 			_buffer.length = 0;
 			
-			return new MixinLoaderSignals(mixins, this);
+			if(total == 1)
+				return new SingleMixinLoaderSignals(_mixins[0], this);
+			else
+				return new MultipleMixinLoaderSignals(_mixins, this);
 		}
 		
 		/**

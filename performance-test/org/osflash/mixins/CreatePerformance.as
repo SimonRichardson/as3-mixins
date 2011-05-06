@@ -1,6 +1,13 @@
 package org.osflash.mixins
 {
-	import org.osflash.mixins.generator.IMixinLoaderSignals;
+	import flash.display.Sprite;
+	import flash.events.Event;
+	import flash.system.System;
+	import flash.text.TextField;
+	import flash.text.TextFieldAutoSize;
+	import flash.text.TextFormat;
+	import flash.utils.getTimer;
+	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 	import org.osflash.mixins.support.IRectangle;
 	import org.osflash.mixins.support.ISquare;
 	import org.osflash.mixins.support.defs.IName;
@@ -10,13 +17,6 @@ package org.osflash.mixins
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.SizeImpl;
 
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.system.System;
-	import flash.text.TextField;
-	import flash.text.TextFieldAutoSize;
-	import flash.text.TextFormat;
-	import flash.utils.getTimer;
 
 	[SWF(width=800, height=600, frameRate=64, backgroundColor=0x333333)]
 	public class CreatePerformance extends Sprite

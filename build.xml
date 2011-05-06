@@ -63,7 +63,7 @@
 			<arg value="-verbose-stacktraces=true"/>
 			<arg value="-headless-server=true"/>
 			
-			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject"/>
+			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject,Frame"/>
 		</java>
 		
 		<exec executable="open" os="Mac OS X">

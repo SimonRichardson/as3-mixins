@@ -1,9 +1,11 @@
 package org.osflash.mixins.generator
 {
 	import org.osflash.mixins.IMixin;
+	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 
 	import flash.display.Loader;
 	import flash.system.ApplicationDomain;
+
 
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -20,7 +22,7 @@ package org.osflash.mixins.generator
 		/**
 		 * Load the bytecode in to the aync Loader for the execution.
 		 */
-		function load(domain : ApplicationDomain = null) : MixinLoaderSignals;
+		function load(domain : ApplicationDomain = null) : IMixinLoaderSignals;
 
 		function dispose() : void;
 

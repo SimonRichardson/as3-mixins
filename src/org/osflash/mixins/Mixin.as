@@ -1,5 +1,9 @@
 package org.osflash.mixins
 {
+	import flash.errors.IllegalOperationError;
+	import flash.system.ApplicationDomain;
+	import flash.utils.Dictionary;
+	import flash.utils.getQualifiedClassName;
 	import org.flemit.bytecode.ByteCodeLayoutBuilder;
 	import org.flemit.bytecode.DynamicClass;
 	import org.flemit.bytecode.IByteCodeLayout;
@@ -11,15 +15,11 @@ package org.osflash.mixins
 	import org.flemit.util.DescribeTypeUtil;
 	import org.flemit.util.MethodUtil;
 	import org.osflash.mixins.generator.IMixinLoader;
-	import org.osflash.mixins.generator.IMixinLoaderSignals;
 	import org.osflash.mixins.generator.MixinGenerator;
 	import org.osflash.mixins.generator.MixinLoader;
 	import org.osflash.mixins.generator.MixinQualifiedName;
+	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 
-	import flash.errors.IllegalOperationError;
-	import flash.system.ApplicationDomain;
-	import flash.utils.Dictionary;
-	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -122,9 +122,17 @@ package org.osflash.mixins
 				
 				const qname : QualifiedName = generatedNames[definition];
 				const fullName : String = qname.ns.name.concat('::', qname.name);
-				const generatedClass : Class = domain.getDefinition(fullName) as Class;
+				if(domain.hasDefinition(fullName))
+				{
+					const generatedClass : Class = domain.getDefinition(fullName) as Class;
 				
-				classes[definition] = generatedClass;
+					classes[definition] = generatedClass;
+				}
+				else
+				{
+					throw new IllegalOperationError('Unable to locate definition with name (' +
+																		fullName + ')');
+				}
 				
 				definitionsToProcess = definitionsToProcess.tail;
 			}
@@ -389,9 +397,6 @@ package org.osflash.mixins
 		 */
 		mixin_internal function buildByteCodeLayout() : IByteCodeLayout
 		{
-			// clean up before we regenerate to prevent conflicts
-			cleanup();
-			
 			// Move on to the generate the classes
 			const total : int = definitions.length;
 			if (total == 0)

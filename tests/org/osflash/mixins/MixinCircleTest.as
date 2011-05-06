@@ -4,8 +4,7 @@ package org.osflash.mixins
 	import asunit.asserts.assertTrue;
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
-
-	import org.osflash.mixins.generator.IMixinLoaderSignals;
+	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 	import org.osflash.mixins.support.ICircle;
 	import org.osflash.mixins.support.defs.IName;
 	import org.osflash.mixins.support.defs.IPosition;
@@ -14,6 +13,7 @@ package org.osflash.mixins
 	import org.osflash.mixins.support.impl.NameImpl;
 	import org.osflash.mixins.support.impl.PositionImpl;
 	import org.osflash.mixins.support.impl.RadiusImpl;
+
 
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
