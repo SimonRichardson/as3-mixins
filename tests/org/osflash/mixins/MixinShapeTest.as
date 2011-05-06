@@ -7,7 +7,7 @@ package org.osflash.mixins
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
 
-	import org.osflash.mixins.generator.MixinGenerationSignals;
+	import org.osflash.mixins.generator.IMixinLoaderSignals;
 	import org.osflash.mixins.support.IRectangle;
 	import org.osflash.mixins.support.ISquare;
 	import org.osflash.mixins.support.defs.IName;
@@ -51,7 +51,7 @@ package org.osflash.mixins
 			mixin.define(ISquare);
 			mixin.define(IRectangle);
 			
-			const signals : MixinGenerationSignals = mixin.generate();
+			const signals : IMixinLoaderSignals = mixin.generate();
 			signals.completedSignal.add(async.add(verifyCreationShapeImplementation, 1000));
 			signals.completedSignal.add(async.add(verifySquareIsRegular, 1000));
 			signals.completedSignal.add(async.add(verifySquareArguments, 1000));

@@ -5,7 +5,8 @@ package org.osflash.mixins
 	import asunit.asserts.assertTrue;
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
-	import org.osflash.mixins.generator.MixinGenerationSignals;
+
+	import org.osflash.mixins.generator.IMixinLoaderSignals;
 	import org.osflash.mixins.support.ISquare;
 	import org.osflash.mixins.support.defs.IName;
 	import org.osflash.mixins.support.defs.IPosition;
@@ -49,7 +50,7 @@ package org.osflash.mixins
 			
 			mixin.define(ISquare);
 			
-			const signals : MixinGenerationSignals = mixin.generate();
+			const signals : IMixinLoaderSignals = mixin.generate();
 			signals.completedSignal.add(async.add(verifyCreationISquareImplementation, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
@@ -73,7 +74,7 @@ package org.osflash.mixins
 			
 			mixin.define(ISquare);
 			
-			const signals : MixinGenerationSignals = mixin.generate();
+			const signals : IMixinLoaderSignals = mixin.generate();
 			signals.completedSignal.add(async.add(verifyGetName, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
@@ -94,7 +95,7 @@ package org.osflash.mixins
 			
 			mixin.define(ISquare);
 			
-			const signals : MixinGenerationSignals = mixin.generate();
+			const signals : IMixinLoaderSignals = mixin.generate();
 			signals.completedSignal.add(async.add(addWidthAndVerifyAddition, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
@@ -121,7 +122,7 @@ package org.osflash.mixins
 			
 			mixin.define(ISquare);
 			
-			const signals : MixinGenerationSignals = mixin.generate();
+			const signals : IMixinLoaderSignals = mixin.generate();
 			signals.completedSignal.add(async.add(addSizeMultipleTimesAndVerifyAddition, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
@@ -155,7 +156,7 @@ package org.osflash.mixins
 			
 			mixin.define(ISquare);
 			
-			const signals : MixinGenerationSignals = mixin.generate();
+			const signals : IMixinLoaderSignals = mixin.generate();
 			signals.completedSignal.add(async.add(	verifyCreationOfMultipleISquareImplementation, 
 													1000
 													));

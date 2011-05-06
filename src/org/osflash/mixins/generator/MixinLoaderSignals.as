@@ -14,30 +14,30 @@ package org.osflash.mixins.generator
 	import flash.events.IOErrorEvent;
 	import flash.system.ApplicationDomain;
 	/**
-	 * @author Simon Richardson - me@simonrichardson.info
+	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public final class MixinGenerationSignals
+	public class MixinLoaderSignals implements IMixinLoaderSignals
 	{
 		
 		/**
 		 * @private
 		 */
-		private const _completedSignal : ISignal = new Signal(IMixin);
+		private const _completedSignal : ISignal = new Signal(Vector.<IMixin>);
 		
 		/**
 		 * @private
 		 */
-		private const _errorSignal : ISignal = new Signal(IMixin, MixinError);
-
-		/**
-		 * @private
-		 */
-		private var _mixin : IMixin;
+		private const _errorSignal : ISignal = new Signal(Vector.<IMixin>, MixinError);
 		
 		/**
 		 * @private
 		 */
-		private var _generator : MixinLoaderGenerator;
+		private var _mixins : Vector.<IMixin>;
+		
+		/**
+		 * @private
+		 */
+		private var _generator : IMixinLoader;
 		
 		/**
 		 * @private
@@ -58,21 +58,20 @@ package org.osflash.mixins.generator
 		 * @private 
 		 */
 		private var _loaderErrorSignal : ISignal;
-
+		
 		/**
 		 */
-		public function MixinGenerationSignals(mixin : IMixin, generator : MixinLoaderGenerator)
+		public function MixinLoaderSignals(mixins : Vector.<IMixin>, generator : IMixinLoader)
 		{
-			if(null == mixin) throw new ArgumentError('Given IMixin can not be null');
-			if(null == generator) throw new ArgumentError('Given MixinLoaderGenerator can not ' + 
-																						'be null');
+			if(null == mixins) throw new ArgumentError('Given Vector.<IMixin> can not be null');
+			if(null == generator) throw new ArgumentError('Given IMixinLoader can not be null');
 			
-			_mixin = mixin;
+			_mixins = mixins;
 			_generator = generator;
 			
 			_loader = generator.loader;
 			if(null == _loader) throw new IllegalOperationError('MixingLoaderGenerator.loader() ' +
-												'can not be null.');
+																			'can not be null.');
 			
 			const loaderInfo : LoaderInfo = _loader.contentLoaderInfo;
 			
@@ -97,7 +96,7 @@ package org.osflash.mixins.generator
 			_loaderErrorSignal.removeAll();
 			_loaderErrorSignal = null;
 		}
-
+		
 		/**
 		 * @private
 		 */
@@ -106,9 +105,9 @@ package org.osflash.mixins.generator
 			const loaderInfo : LoaderInfo = _loader.contentLoaderInfo;
 			const domain : ApplicationDomain = loaderInfo.applicationDomain;
 			
-			mixin.inject(domain);
+			//mixin.inject(domain);
 			
-			completedSignal.dispatch(_mixin);
+			//completedSignal.dispatch(_mixin);
 		}
 				
 		/**
@@ -116,10 +115,13 @@ package org.osflash.mixins.generator
 		 */
 		private function handleLoaderErrorSignal(event : ErrorEvent) : void
 		{
+			/*
 			if(event is IOErrorEvent)
 				errorSignal.dispatch(mixin, MixinError.IO_ERROR);
 			else
 				errorSignal.dispatch(mixin, MixinError.ERROR);
+				 * 
+				 */
 		}
 		
 		/**
@@ -135,6 +137,9 @@ package org.osflash.mixins.generator
 		/**
 		 * Get the current mixin that the signals are actioning on.
 		 */
-		public function get mixin() : IMixin { return _mixin; }
+		public function get mixins() : Vector.<IMixin>
+		{
+			return _mixins;
+		}
 	}
 }

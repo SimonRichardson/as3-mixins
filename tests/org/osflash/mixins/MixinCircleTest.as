@@ -5,7 +5,7 @@ package org.osflash.mixins
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
 
-	import org.osflash.mixins.generator.MixinGenerationSignals;
+	import org.osflash.mixins.generator.IMixinLoaderSignals;
 	import org.osflash.mixins.support.ICircle;
 	import org.osflash.mixins.support.defs.IName;
 	import org.osflash.mixins.support.defs.IPosition;
@@ -47,7 +47,7 @@ package org.osflash.mixins
 			
 			mixin.define(ICircle, CircleImpl);
 			
-			const signals : MixinGenerationSignals = mixin.generate();
+			const signals : IMixinLoaderSignals = mixin.generate();
 			signals.completedSignal.add(async.add(verifyCreationISquareImplementation, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}

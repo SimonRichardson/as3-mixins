@@ -1,6 +1,6 @@
 package org.osflash.mixins
 {
-	import org.osflash.mixins.generator.MixinGenerationSignals;
+	import org.osflash.mixins.generator.IMixinLoaderSignals;
 	import org.osflash.mixins.support.IRectangle;
 	import org.osflash.mixins.support.ISquare;
 	import org.osflash.mixins.support.defs.IName;
@@ -58,7 +58,7 @@ package org.osflash.mixins
 			_mixin.define(ISquare);
 			_mixin.define(IRectangle);
 						
-			const signals : MixinGenerationSignals = _mixin.generate();
+			const signals : IMixinLoaderSignals = _mixin.generate();
 			signals.completedSignal.add(handleCompletedMixinSignal);
 		}
 		

@@ -10,15 +10,15 @@ package org.osflash.mixins
 	import org.flemit.util.ClassUtility;
 	import org.flemit.util.DescribeTypeUtil;
 	import org.flemit.util.MethodUtil;
-	import org.osflash.mixins.generator.MixinGenerationSignals;
+	import org.osflash.mixins.generator.IMixinLoader;
+	import org.osflash.mixins.generator.IMixinLoaderSignals;
 	import org.osflash.mixins.generator.MixinGenerator;
-	import org.osflash.mixins.generator.MixinLoaderGenerator;
+	import org.osflash.mixins.generator.MixinLoader;
 	import org.osflash.mixins.generator.MixinQualifiedName;
 
 	import flash.errors.IllegalOperationError;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
-	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -59,13 +59,8 @@ package org.osflash.mixins
 		/**
 		 * @private
 		 */
-		protected const mixinLoader : MixinLoaderGenerator = new MixinLoaderGenerator();
-				
-		/**
-		 * @private
-		 */
-		protected var mixinSignals : MixinGenerationSignals;
-		
+		protected const mixinLoader : IMixinLoader = new MixinLoader();
+					
 		/**
 		 * 
 		 */
@@ -109,76 +104,10 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function generate() : MixinGenerationSignals
+		public function generate() : IMixinLoaderSignals
 		{
-			// clean up before we regenerate to prevent conflicts
-			cleanup();
-			
-			// Move on to the generate the classes
-			const total : int = definitions.length;
-			if (total == 0)
-			{
-				throw new IllegalOperationError('No definition classes were defined. Use ' +
-												'define() to create mixins.');
-			}
-			
-			// Create a new layout builder
-			const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
-						
-			// go through the classes to prepare and start to register them
-			var definitionsToProcess : MixinBindingList = definitions;
-			while (definitionsToProcess.nonEmpty)
-			{
-				const definitionBinding : IMixinBinding = definitionsToProcess.head;
-				const definition : Class = definitionBinding.key;
-				const superClass : Class = definitionBinding.value;
-				
-				const type : Type = Type.getType(definition);
-				const superType : Type = Type.getType(superClass);
-				
-				const injectors : Dictionary = new Dictionary();
-				if(superType.name != "Object")
-				{
-					const description : XML = DescribeTypeUtil.describe(superClass);
-					const variables : XMLList = description..variable.(metadata.@name == 'Inject');
-					for each(var variable : XML in variables)
-					{
-						const variableName : String = variable.@name;
-						const variableType : String = String(variable.@type).replace(/::/, ":");
-						
-						if(variableType == type.qname.toString())
-						{
-							injectors[variableName] = type;
-						}
-						else
-						{
-							// TODO : inject bindings here
-							// TODO : This should look through the dynamic classes interfaces and find them
-							throw new IllegalOperationError('Unable to inject type (' + 
-											variableType + ') into variable (' + variable + ')');
-						}
-					}
-				}
-					
-				const name : QualifiedName = MixinQualifiedName.create(type);
-				const dynamicClass : DynamicClass = createDynamicClass(	name, 
-																		type, 
-																		superType, 
-																		injectors
-																		);
-				generatedNames[definition] = name;
-				dynamicClasses[definition] = dynamicClass;
-				
-				layoutBuilder.registerType(dynamicClass);
-				
-				definitionsToProcess = definitionsToProcess.tail;
-			}
-			
-			// Create the bytecode layout from the layout builder.
-			const layout : IByteCodeLayout = layoutBuilder.createLayout();
-						
-			// Generate a new loader with the containing bytecode
-			return createLoader(layout);
+			if(!mixinLoader.contains(this)) mixinLoader.add(this);
+			return mixinLoader.load(getApplicationDomain());
 		}
 		
 		/**
@@ -333,12 +262,6 @@ package org.osflash.mixins
 				
 			mixinGenerator.dispose();
 			mixinLoader.dispose();
-			
-			if(null != mixinSignals)
-			{
-				mixinSignals.dispose();
-				mixinSignals = null;
-			}
 		}
 		
 		/**
@@ -420,23 +343,6 @@ package org.osflash.mixins
 			
 			return false;
 		}
-
-		/**
-		 * @private
-		 */
-		protected function createLoader(layout : IByteCodeLayout) : MixinGenerationSignals
-		{
-			// Set the current application domain.
-			const loaderDomain : ApplicationDomain = getApplicationDomain();
-			
-			// Using the signals generate loader feedback
-			mixinSignals = new MixinGenerationSignals(this, mixinLoader);
-			
-			// Create the loader			
-			mixinLoader.load(layout, loaderDomain);						
-			
-			return mixinSignals;
-		}
 				
 		/**
 		 * @private
@@ -476,6 +382,78 @@ package org.osflash.mixins
 			}
 						
 			return mixinGenerator.generate(name, base, superType, mixins, injectors);
+		}
+		
+		/**
+		 * Build the byte code layout
+		 */
+		mixin_internal function buildByteCodeLayout() : IByteCodeLayout
+		{
+			// clean up before we regenerate to prevent conflicts
+			cleanup();
+			
+			// Move on to the generate the classes
+			const total : int = definitions.length;
+			if (total == 0)
+			{
+				throw new IllegalOperationError('No definition classes were defined. Use ' +
+												'define() to create mixins.');
+			}
+			
+			// Create a new layout builder
+			const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
+						
+			// go through the classes to prepare and start to register them
+			var definitionsToProcess : MixinBindingList = definitions;
+			while (definitionsToProcess.nonEmpty)
+			{
+				const definitionBinding : IMixinBinding = definitionsToProcess.head;
+				const definition : Class = definitionBinding.key;
+				const superClass : Class = definitionBinding.value;
+				
+				const type : Type = Type.getType(definition);
+				const superType : Type = Type.getType(superClass);
+				
+				const injectors : Dictionary = new Dictionary();
+				if(superType.name != "Object")
+				{
+					const description : XML = DescribeTypeUtil.describe(superClass);
+					const variables : XMLList = description..variable.(metadata.@name == 'Inject');
+					for each(var variable : XML in variables)
+					{
+						const variableName : String = variable.@name;
+						const variableType : String = String(variable.@type).replace(/::/, ":");
+						
+						if(variableType == type.qname.toString())
+						{
+							injectors[variableName] = type;
+						}
+						else
+						{
+							// TODO : inject bindings here
+							// TODO : This should look through the dynamic classes interfaces and find them
+							throw new IllegalOperationError('Unable to inject type (' + 
+											variableType + ') into variable (' + variable + ')');
+						}
+					}
+				}
+					
+				const name : QualifiedName = MixinQualifiedName.create(type);
+				const dynamicClass : DynamicClass = createDynamicClass(	name, 
+																		type, 
+																		superType, 
+																		injectors
+																		);
+				generatedNames[definition] = name;
+				dynamicClasses[definition] = dynamicClass;
+				
+				layoutBuilder.registerType(dynamicClass);
+				
+				definitionsToProcess = definitionsToProcess.tail;
+			}
+			
+			// Create the bytecode layout from the layout builder.
+			return layoutBuilder.createLayout();
 		}
 	}
 }
