@@ -91,7 +91,7 @@ package org.osflash.mixins
 		{
 			const impl : ISquare = mixin.create(ISquare, {regular:true});
 			
-			assertEquals('ISquare getName should be equal to NameImpl', mixinName, impl.toString());
+			assertEquals('ISquare getName should be equal to class name', mixinName, impl.toString());
 		}
 		
 		[Test]
