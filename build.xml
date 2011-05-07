@@ -28,12 +28,12 @@
 			<arg value="-source-path+=${src.dir}" />
 			
 			<!-- Include all classes in this path. -->
-			<arg value="-include-sources=${src.dir}/${package.dir}" />
+			<arg value="-include-sources+=${src.dir}/${package.dir}" />
 			
 			<!-- Link in classes from swc library (only those used). -->
 			<!-- arg value="-library-path+=${libs.dir}" / -->
 			<arg value="-external-library-path+=${libs.dir}" />
-			
+
 			<arg value="-output=${output.swc}" />
 		</java>
 	</target>
@@ -47,7 +47,7 @@
 			
 			<arg value="-source-path+=${src.dir}"/>
 			<arg value="-source-path+=${tests.dir}"/>
-			
+						
 			<arg value="-output=${tests.swf}"/>
 			
 			<arg value="-target-player=10"/>
@@ -59,10 +59,12 @@
 			<!-- Include classes from SWCs in this folder, but only the ones we use. -->
 			
 			<arg value="-library-path+=${libs.dir}"/>
-			
+						
 			<arg value="-verbose-stacktraces=true"/>
 			<arg value="-headless-server=true"/>
 			
+			<arg value="-optimize=true"/>
+						
 			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject,Frame"/>
 		</java>
 		
@@ -103,7 +105,7 @@
 			
 			<arg value="-verbose-stacktraces=true"/>
 			<arg value="-headless-server=true"/>
-			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject"/>
+			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject,Frame"/>
 		</java>
 		
 		<!-- Execute test runner SWF and publish reports -->

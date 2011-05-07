@@ -1,14 +1,5 @@
 package org.osflash.mixins.generator
 {
-	import flash.utils.getDefinitionByName;
-	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
-	import org.osflash.mixins.generator.signals.SingleMixinLoaderSignals;
-	import flash.display.Loader;
-	import flash.errors.IllegalOperationError;
-	import flash.net.FileReference;
-	import flash.system.ApplicationDomain;
-	import flash.system.LoaderContext;
-	import flash.utils.ByteArray;
 	import org.flemit.SWFHeader;
 	import org.flemit.SWFWriter;
 	import org.flemit.bytecode.IByteCodeLayout;
@@ -21,10 +12,19 @@ package org.osflash.mixins.generator
 	import org.flemit.tags.SetBackgroundColorTag;
 	import org.flemit.tags.ShowFrameTag;
 	import org.osflash.mixins.IMixin;
+	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 	import org.osflash.mixins.generator.signals.MultipleMixinLoaderSignals;
+	import org.osflash.mixins.generator.signals.SingleMixinLoaderSignals;
 	import org.osflash.mixins.generator.uid.UID;
 	import org.osflash.mixins.mixin_internal;
 
+	import flash.display.Loader;
+	import flash.errors.IllegalOperationError;
+	import flash.system.ApplicationDomain;
+	import flash.system.LoaderContext;
+	import flash.utils.ByteArray;
+	
+	
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
@@ -122,14 +122,14 @@ package org.osflash.mixins.generator
 					 					new SetBackgroundColorTag(0xFF, 0x0, 0x0)
 										]);
 			
+			var layout : IByteCodeLayout;
 			for(var i : int = 0; i<total; i++)
 			{
 				const mixin : IMixin = _mixins[i];
 				
 				try
 				{
-					const layout : IByteCodeLayout = mixin.mixin_internal::buildByteCodeLayout();
-					// I'm guessing here that I will have to stitch bytearrays together?
+					layout = mixin.mixin_internal::buildByteCodeLayout();
 				}
 				catch(error : Error)
 				{
@@ -139,20 +139,20 @@ package org.osflash.mixins.generator
 				
 				_layouts.push(layout);
 				
-				// create a writer.
+				// create a unique frame label id.
 				const id : String = UID.create();
 				
 				tags.push(
 					new FrameLabelTag("MixinFrameLabel" + id),
 					new DoABCTag("MixinGenerated" + id, layout)
 				);
-					 
 			}
 			
 			tags.push(	new ShowFrameTag(), 
 						new EndTag()
 						);
-				
+			
+			_writer.compress = true;	
 			_writer.write(_buffer, _header, tags);
 			
 			_buffer.position = 0;

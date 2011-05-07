@@ -1,6 +1,6 @@
-package org.osflash.mixins.support.impl
+package org.osflash.mixins.support.shape.impl
 {
-	import org.osflash.mixins.support.defs.IRadius;
+	import org.osflash.mixins.support.shape.defs.IRadius;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */

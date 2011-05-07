@@ -1,8 +1,8 @@
-package org.osflash.mixins.support.impl
+package org.osflash.mixins.support.shape.impl
 {
-	import org.osflash.mixins.support.defs.IName;
-
 	import flash.utils.getQualifiedClassName;
+	import org.osflash.mixins.support.shape.defs.IName;
+
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */

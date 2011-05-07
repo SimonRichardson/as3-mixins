@@ -7,14 +7,14 @@ package org.osflash.mixins
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
 	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
-	import org.osflash.mixins.support.IRectangle;
-	import org.osflash.mixins.support.ISquare;
-	import org.osflash.mixins.support.defs.IName;
-	import org.osflash.mixins.support.defs.IPosition;
-	import org.osflash.mixins.support.defs.ISize;
-	import org.osflash.mixins.support.impl.NameImpl;
-	import org.osflash.mixins.support.impl.PositionImpl;
-	import org.osflash.mixins.support.impl.SizeImpl;
+	import org.osflash.mixins.support.shape.IRectangle;
+	import org.osflash.mixins.support.shape.ISquare;
+	import org.osflash.mixins.support.shape.defs.IName;
+	import org.osflash.mixins.support.shape.defs.IPosition;
+	import org.osflash.mixins.support.shape.defs.ISize;
+	import org.osflash.mixins.support.shape.impl.NameImpl;
+	import org.osflash.mixins.support.shape.impl.PositionImpl;
+	import org.osflash.mixins.support.shape.impl.SizeImpl;
 
 
 	/**

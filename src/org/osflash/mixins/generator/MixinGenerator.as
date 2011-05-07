@@ -1,6 +1,5 @@
 package org.osflash.mixins.generator
 {
-	import flash.utils.getDefinitionByName;
 	import org.flemit.bytecode.BCNamespace;
 	import org.flemit.bytecode.DynamicClass;
 	import org.flemit.bytecode.DynamicMethod;

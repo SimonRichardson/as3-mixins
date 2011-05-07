@@ -13,6 +13,7 @@ package org.osflash.mixins.generator.signals
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
 	import flash.system.ApplicationDomain;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -24,6 +25,11 @@ package org.osflash.mixins.generator.signals
 		 * @private
 		 */
 		private const _completedSignal : ISignal = new Signal(IMixin);
+		
+		/**
+		 * @private
+		 */
+		private const _progressSignal : ISignal = new Signal(Number, ProgressEvent);
 		
 		/**
 		 * @private
@@ -49,6 +55,11 @@ package org.osflash.mixins.generator.signals
 		 * @private 
 		 */
 		private var _loaderCompletedSignal : ISignal;
+		
+		/**
+		 * @private 
+		 */
+		private var _loaderProgressSignal : ISignal;
 
 		/**
 		 * @private 
@@ -79,6 +90,9 @@ package org.osflash.mixins.generator.signals
 			_loaderCompletedSignal = new NativeSignal(loaderInfo, Event.COMPLETE, Event);
 			_loaderCompletedSignal.addOnce(handleLoaderCompletedSignal);
 			
+			_loaderProgressSignal = new NativeSignal(loaderInfo, ProgressEvent.PROGRESS, Event);
+			_loaderProgressSignal.addOnce(handleLoaderProgressSignal);
+			
 			_loaderIOErrorSignal = new NativeSignal(loaderInfo, IOErrorEvent.IO_ERROR, IOErrorEvent);
 			_loaderIOErrorSignal.addOnce(handleLoaderErrorSignal);
 			
@@ -90,6 +104,9 @@ package org.osflash.mixins.generator.signals
 		{
 			_loaderCompletedSignal.removeAll();
 			_loaderCompletedSignal = null;
+			
+			_loaderProgressSignal.removeAll();
+			_loaderProgressSignal = null;
 			
 			_loaderIOErrorSignal.removeAll();
 			_loaderIOErrorSignal = null;
@@ -110,6 +127,15 @@ package org.osflash.mixins.generator.signals
 			
 			completedSignal.dispatch(_mixin);
 		}
+		
+		/**
+		 * @private
+		 */
+		private function handleLoaderProgressSignal(event : ProgressEvent) : void
+		{
+			const percentage : Number = event.bytesTotal / event.bytesLoaded;
+			progressSignal.dispatch(percentage, event);
+		}
 				
 		/**
 		 * @private
@@ -128,6 +154,11 @@ package org.osflash.mixins.generator.signals
 		public function get completedSignal() : ISignal	{ return _completedSignal; }
 		
 		/**
+		 * @inheritDoc
+		 */
+		public function get progressSignal() : ISignal { return _progressSignal; }
+		
+		/**
 		 * Add a signal to know when the class has been not be succesfully created.
 		 */
 		public function get errorSignal() : ISignal { return _errorSignal; }
@@ -135,9 +166,6 @@ package org.osflash.mixins.generator.signals
 		/**
 		 * Get the current mixin that the signals are actioning on.
 		 */
-		public function get mixins() : IMixin
-		{
-			return _mixin;
-		}
+		public function get mixins() : IMixin { return _mixin; }
 	}
 }

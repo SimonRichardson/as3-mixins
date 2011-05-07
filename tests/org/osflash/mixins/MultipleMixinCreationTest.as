@@ -1,21 +1,25 @@
 package org.osflash.mixins
 {
+	import asunit.asserts.assertEquals;
+	import asunit.asserts.assertNotNull;
+	import asunit.asserts.assertTrue;
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
 
 	import org.osflash.mixins.generator.MixinLoader;
 	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
-	import org.osflash.mixins.support.ICircle;
-	import org.osflash.mixins.support.ISquare;
-	import org.osflash.mixins.support.defs.IName;
-	import org.osflash.mixins.support.defs.IPosition;
-	import org.osflash.mixins.support.defs.IRadius;
-	import org.osflash.mixins.support.defs.ISize;
-	import org.osflash.mixins.support.impl.CircleImpl;
-	import org.osflash.mixins.support.impl.NameImpl;
-	import org.osflash.mixins.support.impl.PositionImpl;
-	import org.osflash.mixins.support.impl.RadiusImpl;
-	import org.osflash.mixins.support.impl.SizeImpl;
+	import org.osflash.mixins.support.shape.ICircle;
+	import org.osflash.mixins.support.shape.ISquare;
+	import org.osflash.mixins.support.shape.defs.IName;
+	import org.osflash.mixins.support.shape.defs.IPosition;
+	import org.osflash.mixins.support.shape.defs.IRadius;
+	import org.osflash.mixins.support.shape.defs.ISize;
+	import org.osflash.mixins.support.shape.impl.CircleImpl;
+	import org.osflash.mixins.support.shape.impl.NameImpl;
+	import org.osflash.mixins.support.shape.impl.PositionImpl;
+	import org.osflash.mixins.support.shape.impl.RadiusImpl;
+	import org.osflash.mixins.support.shape.impl.SizeImpl;
+
 
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -72,7 +76,25 @@ package org.osflash.mixins
 		
 		private function handleCompletedSignal(mixins : Vector.<IMixin>) : void
 		{
+			assertEquals('Resulting mixins length should be 2', 2, mixins.length);
 			
+			const mixin_0 : IMixin = mixins[1];
+						
+			const impl0 : ICircle = mixin_0.create(ICircle);
+						
+			assertNotNull('ICircle implementation is not null', impl0);			
+			assertTrue('Valid creation of ICircle implementation', impl0 is ICircle);
+			assertTrue('Valid creation of IRadius implementation', impl0 is IRadius);
+			assertTrue('Valid creation of IPosition implementation', impl0 is IPosition);
+			
+			const mixin_1 : IMixin = mixins[1];
+			
+			const impl1 : ISquare = mixin_1.create(ISquare, {regular:true});
+			
+			assertNotNull('ISquare implementation is not null', impl1);			
+			assertTrue('Valid creation of ISquare implementation', impl1 is ISquare);
+			assertTrue('Valid creation of ISize implementation', impl1 is ISize);
+			assertTrue('Valid creation of IPosition implementation', impl1 is IPosition);
 		}
 		
 		private function failIfCalled(mixins : Vector.<IMixin>, mixinError : MixinError) : void

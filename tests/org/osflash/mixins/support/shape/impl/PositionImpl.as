@@ -1,6 +1,6 @@
-package org.osflash.mixins.support.impl
+package org.osflash.mixins.support.shape.impl
 {
-	import org.osflash.mixins.support.defs.IPosition;
+	import org.osflash.mixins.support.shape.defs.IPosition;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */

@@ -1,9 +1,9 @@
-package org.osflash.mixins.support.impl
+package org.osflash.mixins.support.shape.impl
 {
-	import org.osflash.mixins.support.ICircle;
-
 	import flash.display.Graphics;
 	import flash.display.Sprite;
+	import org.osflash.mixins.support.shape.ICircle;
+
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */

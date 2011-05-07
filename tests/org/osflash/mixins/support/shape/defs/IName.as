@@ -1,4 +1,4 @@
-package org.osflash.mixins.support.defs
+package org.osflash.mixins.support.shape.defs
 {
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
