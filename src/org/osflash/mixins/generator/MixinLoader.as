@@ -16,7 +16,6 @@ package org.osflash.mixins.generator
 	import org.osflash.mixins.generator.signals.MultipleMixinLoaderSignals;
 	import org.osflash.mixins.generator.signals.SingleMixinLoaderSignals;
 	import org.osflash.mixins.generator.uid.UID;
-	import org.osflash.mixins.mixin_internal;
 
 	import flash.display.Loader;
 	import flash.errors.IllegalOperationError;
@@ -129,7 +128,7 @@ package org.osflash.mixins.generator
 				
 				try
 				{
-					layout = mixin.mixin_internal::buildByteCodeLayout();
+					layout = mixin.buildByteCodeLayout();
 				}
 				catch(error : Error)
 				{

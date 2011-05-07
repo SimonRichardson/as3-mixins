@@ -16,17 +16,11 @@ package org.osflash.mixins
 		 */
 		private var _value : Class;
 		
-		/**
-		 * @private
-		 */
-		private var _ignore : Boolean;
 
 		public function MixinBinding(key : Class, value : Class)
 		{
 			_key = key;
 			_value = value;
-			
-			_ignore = false;
 		}
 		
 		/**
@@ -41,10 +35,5 @@ package org.osflash.mixins
 		public function get value() : Class { return _value; }
 		public function set value(value : Class) : void { _value = value; }
 		
-		/**
-		 * @inheritDoc
-		 */
-		public function get ignore() : Boolean { return _ignore; }
-		public function set ignore(value : Boolean) : void { _ignore = value; }
 	}
 }

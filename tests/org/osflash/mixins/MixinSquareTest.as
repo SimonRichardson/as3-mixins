@@ -1,5 +1,6 @@
 package org.osflash.mixins
 {
+	import org.flemit.bytecode.QualifiedName;
 	import asunit.asserts.assertEquals;
 	import asunit.asserts.assertNotNull;
 	import asunit.asserts.assertTrue;
@@ -28,6 +29,8 @@ package org.osflash.mixins
 						
 		protected var mixin : IMixin; 
 		
+		protected var mixinName : String;
+		
 		[Before]
 		public function setUp():void
 		{
@@ -37,6 +40,8 @@ package org.osflash.mixins
 		[After]
 		public function tearDown():void
 		{
+			mixinName = null;
+			
 			mixin.removeAll();
 			mixin = null;
 		}
@@ -65,6 +70,7 @@ package org.osflash.mixins
 			assertTrue('Valid creation of IPosition implementation', impl is IPosition);
 		}
 		
+		
 		[Test]
 		public function create_square_mixin_and_verify_getName() : void
 		{
@@ -72,7 +78,9 @@ package org.osflash.mixins
 			mixin.add(ISize, SizeImpl);
 			mixin.add(IName, NameImpl);
 			
-			mixin.define(ISquare);
+			const binding : IMixinNamedBinding = mixin.define(ISquare);
+			const qname : QualifiedName = binding.name;
+			mixinName = qname.name;
 			
 			const signals : IMixinLoaderSignals = mixin.generate();
 			signals.completedSignal.add(async.add(verifyGetName, 1000));
@@ -83,7 +91,7 @@ package org.osflash.mixins
 		{
 			const impl : ISquare = mixin.create(ISquare, {regular:true});
 			
-			assertEquals('ISquare getName should be equal to NameImpl', 'NameImpl', impl.toString());
+			assertEquals('ISquare getName should be equal to NameImpl', mixinName, impl.toString());
 		}
 		
 		[Test]

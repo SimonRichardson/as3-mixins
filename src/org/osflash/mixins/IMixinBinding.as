@@ -19,12 +19,5 @@ package org.osflash.mixins
 		function get value() : Class;
 		
 		function set value(value :  Class) : void;
-		
-		/**
-		 * 
-		 */
-		function get ignore() : Boolean;
-		
-		function set ignore(value : Boolean) : void;
 	}
 }

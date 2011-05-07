@@ -1,5 +1,6 @@
 package org.osflash.mixins
 {
+	import org.flemit.bytecode.IByteCodeLayout;
 	import flash.system.ApplicationDomain;
 	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 
@@ -27,7 +28,7 @@ package org.osflash.mixins
 		 * @throws ArgumentError if implementation is <code>null</code>
 		 * @throws ArgumentError if the implementation doesn't implement the descriptors
 		 */
-		function define(implementation : Class, superClass : Class = null) : IMixinBinding;
+		function define(implementation : Class, superClass : Class = null) : IMixinNamedBinding;
 		
 		/**
 		 * Generate the new mixins, a callback can be used to find out if the process was
@@ -63,5 +64,10 @@ package org.osflash.mixins
 		 * Unsubscribes all observers and implementations from the mixin.
 		 */
 		function removeAll() : void;
+		
+		/**
+		 * Call to build the bytecode layout.
+		 */
+		function buildByteCodeLayout() : IByteCodeLayout;
 	}
 }

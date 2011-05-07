@@ -13,7 +13,6 @@ package org.osflash.mixins
 	import org.osflash.mixins.generator.IMixinLoader;
 	import org.osflash.mixins.generator.MixinGenerator;
 	import org.osflash.mixins.generator.MixinLoader;
-	import org.osflash.mixins.generator.MixinQualifiedName;
 	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 
 	import flash.errors.IllegalOperationError;
@@ -86,7 +85,9 @@ package org.osflash.mixins
 		/**
 		 * @inheritDoc
 		 */
-		public function define(implementation : Class, superClass : Class = null) : IMixinBinding
+		public function define(	implementation : Class, 
+								superClass : Class = null
+								) : IMixinNamedBinding
 		{
 			if(null == implementation) throw new ArgumentError('Given implementation can not ' + 
 																					'be null');
@@ -318,16 +319,18 @@ package org.osflash.mixins
 		 */
 		protected function registerImplementation(	implementation : Class, 
 													superClass : Class
-													) : IMixinBinding
+													) : IMixinNamedBinding
 		{
 			if(registrationImplementationPossible(implementation, superClass))
 			{
-				const binding : IMixinBinding = new MixinBinding(implementation, superClass);
+				const binding : IMixinNamedBinding = new MixinNamedBinding(	implementation, 
+																			superClass
+																			);
 				definitions = definitions.append(binding);
 				return binding;
 			}
 			
-			return definitions.find(implementation);
+			return IMixinNamedBinding(definitions.find(implementation));
 		}
 		
 		/**
@@ -380,8 +383,7 @@ package org.osflash.mixins
 				const binding : IMixinBinding = bindings.find(type.classDefinition);
 				if(null != binding)
 				{
-					if(!binding.ignore) 
-						mixins[type] = binding.value;
+					mixins[type] = binding.value;
 				}
 				else
 				{
@@ -396,7 +398,7 @@ package org.osflash.mixins
 		/**
 		 * Build the byte code layout
 		 */
-		mixin_internal function buildByteCodeLayout() : IByteCodeLayout
+		public function buildByteCodeLayout() : IByteCodeLayout
 		{
 			// Move on to the generate the classes
 			const total : int = definitions.length;
@@ -413,7 +415,8 @@ package org.osflash.mixins
 			var definitionsToProcess : MixinBindingList = definitions;
 			while (definitionsToProcess.nonEmpty)
 			{
-				const definitionBinding : IMixinBinding = definitionsToProcess.head;
+				const definitionBinding : IMixinNamedBinding = 
+													IMixinNamedBinding(definitionsToProcess.head);
 				const definition : Class = definitionBinding.key;
 				const superClass : Class = definitionBinding.value;
 				
@@ -444,7 +447,7 @@ package org.osflash.mixins
 					}
 				}
 					
-				const name : QualifiedName = MixinQualifiedName.create(type);
+				const name : QualifiedName = definitionBinding.name;
 				const dynamicClass : DynamicClass = createDynamicClass(	name, 
 																		type, 
 																		superType, 

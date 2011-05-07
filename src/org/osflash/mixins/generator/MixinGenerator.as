@@ -9,7 +9,6 @@ package org.osflash.mixins.generator
 	import org.flemit.bytecode.NamespaceSet;
 	import org.flemit.bytecode.QualifiedName;
 	import org.flemit.reflection.FieldInfo;
-	import org.flemit.reflection.MemberInfo;
 	import org.flemit.reflection.MemberVisibility;
 	import org.flemit.reflection.MetadataInfo;
 	import org.flemit.reflection.MethodInfo;
@@ -50,8 +49,7 @@ package org.osflash.mixins.generator
 			dynamicClass.addMethodBody(	dynamicClass.constructor, 
 										generateInitialiser(	dynamicClass, 
 																mixins, 
-																base, 
-																superType, 
+																base,
 																injectors
 																)
 										);
@@ -100,7 +98,6 @@ package org.osflash.mixins.generator
 		protected function generateInitialiser(	dynamicClass : DynamicClass, 
 												mixins : Dictionary,
 												base : Type,
-												superType : Type,
 												injectors : Dictionary
 												) : DynamicMethod
 		{
@@ -125,7 +122,6 @@ package org.osflash.mixins.generator
 			const initMethod : MethodInfo = generateInitMethod(	dynamicClass, 
 																mixins, 
 																base,
-																superType,
 																injectors
 																);
 			// Finish the constructor
@@ -150,7 +146,6 @@ package org.osflash.mixins.generator
 		protected function generateInitMethod(	dynamicClass : DynamicClass,
 												mixins : Dictionary,
 												base : Type,
-												superType : Type,
 												injectors : Dictionary
 												) : MethodInfo
 		{
@@ -308,24 +303,7 @@ package org.osflash.mixins.generator
 			// TODO : sanity check the property name
 			return new QualifiedName(ns, propertyName);
 		}
-		
-		private function getMembers(superType : Type) : Dictionary
-		{
-			const memberNames : Dictionary = new Dictionary();
-			if(null == superType) return memberNames;
-			
-			const members : Array = superType.getMembers(false, true, true);
-			const total : int = members.length;
-			for(var i : int = 0; i<total; i++)
-			{
-				const member : MemberInfo = members[i];
-				const memberName : String = member.name;
-				memberNames[memberName] = memberName;
-			}
-			
-			return memberNames;
-		}
-		
+				
 		private function getMethods(superType : Type) : Dictionary
 		{
 			const methodNames : Dictionary = new Dictionary();
