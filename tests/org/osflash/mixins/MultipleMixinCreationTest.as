@@ -78,7 +78,7 @@ package org.osflash.mixins
 		{
 			assertEquals('Resulting mixins length should be 2', 2, mixins.length);
 			
-			const mixin_0 : IMixin = mixins[1];
+			const mixin_0 : IMixin = mixins[0];
 						
 			const impl0 : ICircle = mixin_0.create(ICircle);
 						

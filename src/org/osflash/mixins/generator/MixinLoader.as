@@ -117,7 +117,7 @@ package org.osflash.mixins.generator
 			_domain = null == domain ? ApplicationDomain.currentDomain : domain;
 			
 			const tags : Vector.<ITag> = Vector.<ITag>([
-									 	new FileAttributesTag(false, false, false, true, true),
+									 	new FileAttributesTag(false, false, true, true, true),
 					 					new ScriptLimitsTag(),
 					 					new SetBackgroundColorTag(0xFF, 0x0, 0x0)
 										]);
@@ -137,8 +137,6 @@ package org.osflash.mixins.generator
 																				'(' + mixin + ')');
 				}
 				
-				_layouts.push(layout);
-				
 				// create a unique frame label id.
 				const id : String = UID.create();
 				
@@ -146,13 +144,15 @@ package org.osflash.mixins.generator
 					new FrameLabelTag("MixinFrameLabel" + id),
 					new DoABCTag("MixinGenerated" + id, layout)
 				);
+				
+				_layouts.push(layout);
 			}
 			
 			tags.push(	new ShowFrameTag(), 
 						new EndTag()
 						);
 			
-			_writer.compress = true;	
+			// _writer.compress = true;	
 			_writer.write(_buffer, _header, tags);
 			
 			_buffer.position = 0;
