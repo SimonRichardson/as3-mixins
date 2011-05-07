@@ -133,6 +133,7 @@ package org.osflash.mixins.generator
 				}
 				catch(error : Error)
 				{
+					throw error;
 					throw new IllegalOperationError('Unable to generate the bytecode for mixin ' + 
 																				'(' + mixin + ')');
 				}

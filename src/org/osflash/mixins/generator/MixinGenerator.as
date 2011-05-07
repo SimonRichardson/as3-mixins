@@ -79,6 +79,7 @@ package org.osflash.mixins.generator
 			for (var i : int = 0; i < total; i++) 
 			{
 				const propertyInfo : PropertyInfo = properties[i];
+				if(!propertyInfo.canWrite) continue;
 				params.push(new ParameterInfo(propertyInfo.name, propertyInfo.type, true));
 			}
 			
@@ -105,7 +106,6 @@ package org.osflash.mixins.generator
 		{
 			const baseConstructor : MethodInfo = dynamicClass.baseType.constructor;
 			const baseConstructorArgCount : int = baseConstructor.parameters.length;
-			
 			
 			
 			const instructions : Array = [	[Instructions.GetLocal_0],
@@ -167,6 +167,7 @@ package org.osflash.mixins.generator
 			for (i = 0; i < total; i++) 
 			{
 				propertyInfo = properties[i];
+				if(!propertyInfo.canWrite) continue;
 				params.push(new ParameterInfo(propertyInfo.name, propertyInfo.type, true));
 			}
 			
@@ -209,6 +210,7 @@ package org.osflash.mixins.generator
 					local++;
 					
 					propertyInfo = properties[i];
+					if(!propertyInfo.canWrite) continue;
 					
 					const propertyTypeName : QualifiedName = buildPropName( ns,
 																			propertyInfo.name
