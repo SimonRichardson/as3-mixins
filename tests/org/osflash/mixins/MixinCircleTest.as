@@ -4,6 +4,7 @@ package org.osflash.mixins
 	import asunit.asserts.assertTrue;
 	import asunit.asserts.fail;
 	import asunit.framework.IAsync;
+
 	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 	import org.osflash.mixins.support.shape.ICircle;
 	import org.osflash.mixins.support.shape.defs.IName;

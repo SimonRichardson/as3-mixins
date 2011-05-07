@@ -107,7 +107,6 @@ package org.osflash.mixins.generator
 			const baseConstructor : MethodInfo = dynamicClass.baseType.constructor;
 			const baseConstructorArgCount : int = baseConstructor.parameters.length;
 			
-			
 			const instructions : Array = [	[Instructions.GetLocal_0],
 											[Instructions.PushScope],
 											[Instructions.GetLocal_0],
@@ -192,15 +191,27 @@ package org.osflash.mixins.generator
 			
 			for(var key : Object in mixins)
 			{
-				const descriptorType : Type = Type(key);							
+				const descriptorType : Type = Type(key);
+				if(!descriptorType.isInterface) throw new IllegalOperationError('Descriptor (' +
+										descriptorType.name + ') should be a type of Interface.');
+											
 				const descriptorTypeName : QualifiedName = buildProxyPropName(	ns, 
 																				descriptorType
 																				);
-				const implType : Type = Type.getType(mixins[key]);
+				const impl : Class = mixins[key];
+				
+				const implType : Type = Type.getType(impl);
 				
 				instructions.push([Instructions.GetLocal_0]);
 				instructions.push([Instructions.FindPropertyStrict, implType.qname]);
-				instructions.push([Instructions.ConstructProp, implType.qname, 0]);
+				
+				// work out here if we need to push the mixin.
+				const paramCount : int = implType.constructor.parameters.length;
+				if(paramCount == 1) instructions.push([Instructions.GetLocal_0]);
+				if(paramCount > 1) throw new IllegalOperationError('More than one constructor ' +
+											'argument is not supported (' + implType.name + ').');
+				
+				instructions.push([Instructions.ConstructProp, implType.qname, paramCount]);
 				instructions.push([Instructions.SetProperty, descriptorTypeName]);
 				
 				properties = descriptorType.getProperties();

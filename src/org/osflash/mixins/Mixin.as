@@ -1,9 +1,5 @@
 package org.osflash.mixins
 {
-	import flash.errors.IllegalOperationError;
-	import flash.system.ApplicationDomain;
-	import flash.utils.Dictionary;
-	import flash.utils.getQualifiedClassName;
 	import org.flemit.bytecode.ByteCodeLayoutBuilder;
 	import org.flemit.bytecode.DynamicClass;
 	import org.flemit.bytecode.IByteCodeLayout;
@@ -19,6 +15,11 @@ package org.osflash.mixins
 	import org.osflash.mixins.generator.MixinLoader;
 	import org.osflash.mixins.generator.MixinQualifiedName;
 	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
+
+	import flash.errors.IllegalOperationError;
+	import flash.system.ApplicationDomain;
+	import flash.utils.Dictionary;
+	import flash.utils.getQualifiedClassName;
 
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
@@ -62,7 +63,7 @@ package org.osflash.mixins
 		protected const mixinLoader : IMixinLoader = new MixinLoader();
 					
 		/**
-		 * 
+		 * Empty constructor
 		 */
 		public function Mixin()
 		{
