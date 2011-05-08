@@ -387,8 +387,8 @@ package org.osflash.mixins
 				}
 				else
 				{
-					throw new MixinError('Interface ' + type + ' defined on ' + base + 
-											'has not being defined'); 
+					throw new MixinError('Interface ' + type.name + ' defined on ' + base.name + 
+																		' has not been defined'); 
 				}
 			}
 						

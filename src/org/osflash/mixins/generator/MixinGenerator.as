@@ -213,10 +213,10 @@ package org.osflash.mixins.generator
 				total = properties.length;
 				for(i = 0; i<total; i++)
 				{
-					local++;
-					
 					propertyInfo = properties[i];
 					if(!propertyInfo.canWrite) continue;
+					
+					local++;
 					
 					const propertyTypeName : QualifiedName = buildPropName( ns,
 																			propertyInfo.name
