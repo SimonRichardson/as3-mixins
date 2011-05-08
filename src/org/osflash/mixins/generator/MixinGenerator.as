@@ -50,6 +50,7 @@ package org.osflash.mixins.generator
 										generateInitialiser(	dynamicClass, 
 																mixins, 
 																base,
+																superType,
 																injectors
 																)
 										);
@@ -98,6 +99,7 @@ package org.osflash.mixins.generator
 		protected function generateInitialiser(	dynamicClass : DynamicClass, 
 												mixins : Dictionary,
 												base : Type,
+												superType : Type,
 												injectors : Dictionary
 												) : DynamicMethod
 		{
@@ -122,6 +124,7 @@ package org.osflash.mixins.generator
 			const initMethod : MethodInfo = generateInitMethod(	dynamicClass, 
 																mixins, 
 																base,
+																superType,
 																injectors
 																);
 			// Finish the constructor
@@ -146,6 +149,7 @@ package org.osflash.mixins.generator
 		protected function generateInitMethod(	dynamicClass : DynamicClass,
 												mixins : Dictionary,
 												base : Type,
+												superType : Type,
 												injectors : Dictionary
 												) : MethodInfo
 		{
@@ -251,17 +255,20 @@ package org.osflash.mixins.generator
 				}
 			}
 			
-//			const isObject : Boolean = superType.name == "Object";
-//			
-//			if(!isObject)
-//			{
-//				const methodNames : Dictionary = getMethods(superType);
-//				const initMethid
-//				if(methodNames["__init__"])
-//				{
-//					
-//				}
-//			}
+			const isObject : Boolean = superType.name == "Object";
+			
+			if(!isObject)
+			{
+				const methodNames : Dictionary = getMethods(superType);
+				const initMethod : MethodInfo = methodNames["__init__"];
+				if(null != initMethod)
+				{
+					instructions.push(
+						[Instructions.GetLocal_0],
+						[Instructions.CallSuperVoid, initMethod.qname, 0]
+					);
+				}
+			}
 			
 			// Return void, we've finished.			
 			instructions.push(
@@ -315,7 +322,7 @@ package org.osflash.mixins.generator
 			{
 				const method : MethodInfo = methods[i];
 				const methodName : String = method.name;
-				methodNames[methodName] = methodName;
+				methodNames[methodName] = method;
 			}
 			
 			return methodNames;
@@ -332,7 +339,7 @@ package org.osflash.mixins.generator
 			{
 				const property : PropertyInfo = properties[i];
 				const propertyName : String = property.name;
-				propertyNames[propertyName] = propertyName;
+				propertyNames[propertyName] = property;
 			}
 			
 			return propertyNames;

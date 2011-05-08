@@ -13,6 +13,11 @@ package org.osflash.mixins.support.shape.impl
 		[Inject]
 		public var circle : ICircle;
 		
+		public function _init_() : void
+		{
+			
+		}
+		
 		public function draw() : void
 		{
 			const g : Graphics = graphics;

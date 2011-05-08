@@ -161,6 +161,8 @@ package org.osflash.mixins.generator
 			const loaderContext:LoaderContext = new LoaderContext(false, _domain);
 			enableAIRDynamicExecution(loaderContext);
 			
+			//new FileReference().save(_buffer, "dump.swf");
+			
 			// Loader the buffer to the loaded bytes
 			_loader.loadBytes(_buffer, loaderContext);
 			
