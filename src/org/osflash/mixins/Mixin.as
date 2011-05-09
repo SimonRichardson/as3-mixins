@@ -423,29 +423,7 @@ package org.osflash.mixins
 				const type : Type = Type.getType(definition);
 				const superType : Type = Type.getType(superClass);
 				
-				const injectors : Dictionary = new Dictionary();
-				if(superType.name != "Object")
-				{
-					const description : XML = DescribeTypeUtil.describe(superClass);
-					const variables : XMLList = description..variable.(metadata.@name == 'Inject');
-					for each(var variable : XML in variables)
-					{
-						const variableName : String = variable.@name;
-						const variableType : String = String(variable.@type).replace(/::/, ":");
-						
-						if(variableType == type.qname.toString())
-						{
-							injectors[variableName] = type;
-						}
-						else
-						{
-							// TODO : inject bindings here
-							// TODO : This should look through the dynamic classes interfaces and find them
-							throw new IllegalOperationError('Unable to inject type (' + 
-											variableType + ') into variable (' + variable + ')');
-						}
-					}
-				}
+				const injectors : Dictionary = getMetadataFromInjector(type, superType, superClass);
 					
 				const name : QualifiedName = definitionBinding.name;
 				const dynamicClass : DynamicClass = createDynamicClass(	name, 
@@ -463,6 +441,51 @@ package org.osflash.mixins
 			
 			// Create the bytecode layout from the layout builder.
 			return layoutBuilder.createLayout();
+		}
+		
+		/**
+		 * @private
+		 */
+		protected function getMetadataFromInjector(	type : Type, 
+													superType : Type,
+													superClass : Class
+													) : Dictionary
+		{
+			const injectors : Dictionary = new Dictionary();
+			if(superType.name != "Object")
+			{
+				const description : XML = DescribeTypeUtil.describe(superClass);
+				
+				const factory : XMLList = description.child('factory');
+				if(factory.length() == 0) return injectors;
+				
+				const variables : XMLList = factory.child('variable');
+				if(variables.length() == 0) return injectors;
+				
+				for each(var variable : XML in variables)
+				{
+					const metadata : XMLList = variable.child('metadata');
+					
+					if(metadata.@name == 'Inject')
+					{
+						const variableName : String = variable.@name;
+						const variableType : String = String(variable.@type).replace(/::/, ":");
+						
+						if(variableType == type.qname.toString())
+						{
+							injectors[variableName] = type;
+						}
+						else
+						{
+							// TODO : inject bindings here
+							// TODO : This should look through the dynamic classes interfaces and find them
+							throw new IllegalOperationError('Unable to inject type (' + 
+											variableType + ') into variable (' + variable + ')');
+						}
+					}
+				}
+			}
+			return injectors;
 		}
 	}
 }
