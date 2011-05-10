@@ -49,11 +49,11 @@ package org.osflash.mixins
 			mixin.define(ICircle, CircleImpl);
 			
 			const signals : IMixinLoaderSignals = mixin.generate();
-			signals.completedSignal.add(async.add(verifyCreationISquareImplementation, 1000));
+			signals.completedSignal.add(async.add(verifyCreationICircleImplementation, 1000));
 			signals.errorSignal.add(failIfCalled);
 		}
 
-		private function verifyCreationISquareImplementation(mixin : IMixin) : void
+		private function verifyCreationICircleImplementation(mixin : IMixin) : void
 		{
 			const impl : ICircle = mixin.create(ICircle);
 						
