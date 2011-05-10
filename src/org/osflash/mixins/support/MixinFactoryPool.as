@@ -39,7 +39,12 @@ package org.osflash.mixins.support
 		 * @private 
 		 */
 		private var _poolGrowSize : int;
-
+		
+		/**
+		 * @private
+		 */
+		private var _size : int;
+		
 		public function MixinFactoryPool(	mixin : IMixin,
 											definitive : Class,
 											defaultArguments : Object = null
@@ -47,9 +52,13 @@ package org.osflash.mixins.support
 		{
 			_mixin = mixin;
 			
+			_pool = [];
+			_arguments = [];
+			
 			this.definitive = definitive;
 			this.defaultArguments = defaultArguments;
 			
+			_size = 0;
 			_poolGrowSize = POOL_GROWTH_SIZE;
 			
 			grow();
@@ -103,6 +112,7 @@ package org.osflash.mixins.support
 				while(--index > -1)
 				{
 					_pool.push(_mixin.create(_definitive, _defaultArguments));
+					_size++;
 				}
 			}
 			catch(error : Error)
@@ -110,6 +120,16 @@ package org.osflash.mixins.support
 				throw new IllegalOperationError('Unable to grow the Mixin pool.');
 			}
 		}
+		
+		/**
+		 * Get the current size of all the mixins.
+		 */
+		public function get size() : int { return _size; }
+		
+		/**
+		 * Get the current size of the pool.
+		 */
+		public function get poolSize() : int { return _pool.length; }
 		
 		/**
 		 * Get the default growth size of the pool. This is so you can make more out when the pool 
@@ -140,6 +160,18 @@ package org.osflash.mixins.support
 		 * Get the definitive class
 		 */
 		public function get definitive() : Class { return _definitive; }
-		public function set definitive(definitive : Class) : void {	_definitive = definitive; }
+		public function set definitive(value : Class) : void 
+		{
+			if(null == value) throw new ArgumentError('Given value can not be null.');
+			
+			_definitive = value;
+			
+			const total : int = _pool.length;
+			for(var i : int = 0; i<total; i++)
+			{
+				if(!(value is _definitive)) throw new ArgumentError('Given Mixin does not extend' +
+											' the correct definitive class (' + _definitive + ')');
+			}
+		}
 	}
 }
