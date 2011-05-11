@@ -15,6 +15,7 @@ package org.osflash.mixins.generator
 	import org.flemit.reflection.ParameterInfo;
 	import org.flemit.reflection.PropertyInfo;
 	import org.flemit.reflection.Type;
+	import org.osflash.mixins.IMixinBinding;
 	import org.osflash.mixins.MixinError;
 
 	import flash.errors.IllegalOperationError;
@@ -236,27 +237,66 @@ package org.osflash.mixins.generator
 			
 			for(var variable : String in injectors)
 			{
-				const variableType : Type = injectors[variable];
-				if(variableType.qname.toString() == base.qname.toString())
+				if(injectors[variable] is Type)
 				{
-					// This wanting a reference to it's self.
-					const self : QualifiedName = buildPropName(ns, variable);
-					instructions.push(
-						[Instructions.GetLocal_0],
-						[Instructions.GetLocal_0],
-						[Instructions.SetSuper, self]
-					);
+					const variableType : Type = injectors[variable];
+					if(variableType.qname.toString() == base.qname.toString())
+					{
+						// This wanting a reference to it's self.
+						const self : QualifiedName = buildPropName(ns, variable);
+						instructions.push(
+							[Instructions.GetLocal_0],
+							[Instructions.GetLocal_0],
+							[Instructions.SetSuper, self]
+						);
+						
+						injectors[variable] = null;
+						delete injectors[variable];
+					}
+					else
+					{
+						throw new IllegalOperationError('Unable to inject type (' + 
+										variableType.name +	') into variable (' + variable + ')');
+					}
+				}
+				else if(injectors[variable] is IMixinBinding)
+				{
+					const binding : IMixinBinding = injectors[variable];
+					const descriptor : Class = binding.key;
+					const implementation : Class = binding.value;
+					
+					const bindingDescriptorType : Type = Type.getType(descriptor);
+					
+					const variablePropName : QualifiedName = buildProxyPropName(ns, 
+																			bindingDescriptorType);
+					if(null != dynamicClass.getField(variablePropName.name, ''))
+					{
+						const variableQName : QualifiedName = buildPropName(ns, variable);
+						
+						instructions.push(
+							[Instructions.GetLocal_0],
+							[Instructions.GetLocal_0],
+							[Instructions.GetProperty, variablePropName],
+							[Instructions.SetSuper, variableQName]
+						);
+						
+						injectors[variable] = null;
+						delete injectors[variable];
+					}
+					else
+					{
+						throw new IllegalOperationError('Unable to inject type (' + 
+										variableType.name +	') into variable (' + variable + ')');
+					}
 				}
 				else
 				{
-					// TODO : This should look through the dynamic classes interfaces and find them
-					throw new IllegalOperationError('Unable to inject type (' + variableType.name +
-													') into variable (' + variable + ')');
+					throw new IllegalOperationError('Unable to inject type (' + 
+										variableType.name +	') into variable (' + variable + ')');
 				}
 			}
 			
 			const isObject : Boolean = superType.name == "Object";
-			
 			if(!isObject)
 			{
 				const methodNames : Dictionary = getMethods(superType);
@@ -274,7 +314,6 @@ package org.osflash.mixins.generator
 			instructions.push(
 				[Instructions.ReturnVoid]
 			);
-			
 			
 			// Finish off the init method
 			const argumentBytes : int = proxies * 9;

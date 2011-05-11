@@ -451,7 +451,7 @@ package org.osflash.mixins
 													superClass : Class
 													) : Dictionary
 		{
-			const injectors : Dictionary = new Dictionary();
+			const injectors : Dictionary = new Dictionary(true);
 			if(superType.name != "Object")
 			{
 				const description : XML = DescribeTypeUtil.describe(superClass);
@@ -477,10 +477,32 @@ package org.osflash.mixins
 						}
 						else
 						{
-							// TODO : inject bindings here
-							// TODO : This should look through the dynamic classes interfaces and find them
-							throw new IllegalOperationError('Unable to inject type (' + 
-											variableType + ') into variable (' + variable + ')');
+							var found : Boolean = false;
+							var bindingsToProcess : MixinBindingList = bindings;
+							while(bindingsToProcess.nonEmpty)
+							{
+								const binding : IMixinBinding = bindingsToProcess.head;
+								const descriptor : Class = binding.key;
+								const implementation : Class = binding.value;
+								
+								const descriptorType : Type = Type.getType(descriptor);
+								
+								if(descriptorType.qname.toString() == variableType)
+								{
+									injectors[variableName] = binding;
+									
+									found = true;
+									break;
+								}
+								
+								bindingsToProcess = bindingsToProcess.tail;
+							}
+							
+							if(!found)
+							{
+								throw new IllegalOperationError('Unable to inject type (' + 
+											variableType + ') into variable (' + variableName + ')');
+							}
 						}
 					}
 				}
