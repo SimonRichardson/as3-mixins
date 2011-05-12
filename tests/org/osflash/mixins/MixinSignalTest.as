@@ -34,7 +34,7 @@ package org.osflash.mixins
 			mixin = null;
 		}
 		
-		[Tester]
+		[Test]
 		public function create_signal_mixin_and_verify_creation() : void
 		{
 			mixin.add(ISignal, Signal);
