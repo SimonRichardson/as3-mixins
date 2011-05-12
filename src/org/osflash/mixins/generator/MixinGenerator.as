@@ -244,71 +244,72 @@ package org.osflash.mixins.generator
 				
 				proxies++;
 			}
-			
-			for(var variable : String in injectors)
-			{
-				if(injectors[variable] is Type)
-				{
-					const variableType : Type = injectors[variable];
-					if(variableType.qname.toString() == base.qname.toString())
-					{
-						// This wanting a reference to it's self.
-						const self : QualifiedName = buildPropName(ns, variable);
-						instructions.push(
-							[Instructions.GetLocal_0],
-							[Instructions.GetLocal_0],
-							[Instructions.SetSuper, self]
-						);
 						
-						injectors[variable] = null;
-						delete injectors[variable];
-					}
-					else
-					{
-						throw new IllegalOperationError('Unable to inject type (' + 
-										variableType.name +	') into variable (' + variable + ')');
-					}
-				}
-				else if(injectors[variable] is IMixinBinding)
-				{
-					const binding : IMixinBinding = injectors[variable];
-					const descriptor : Class = binding.key;
-					const implementation : Class = binding.value;
-					
-					const bindingDescriptorType : Type = Type.getType(descriptor);
-					
-					const variablePropName : QualifiedName = buildProxyPropName(ns, 
-																			bindingDescriptorType);
-					if(null != dynamicClass.getField(variablePropName.name, ''))
-					{
-						const variableQName : QualifiedName = buildPropName(ns, variable);
-						
-						instructions.push(
-							[Instructions.GetLocal_0],
-							[Instructions.GetLocal_0],
-							[Instructions.GetProperty, variablePropName],
-							[Instructions.SetSuper, variableQName]
-						);
-						
-						injectors[variable] = null;
-						delete injectors[variable];
-					}
-					else
-					{
-						throw new IllegalOperationError('Unable to inject type (' + 
-										variableType.name +	') into variable (' + variable + ')');
-					}
-				}
-				else
-				{
-					throw new IllegalOperationError('Unable to inject type (' + 
-										variableType.name +	') into variable (' + variable + ')');
-				}
-			}
-			
 			const isObject : Boolean = superType.name == "Object";
 			if(!isObject)
 			{
+				// Add the injectors if and only if it's not an object
+				for(var variable : String in injectors)
+				{
+					if(injectors[variable] is Type)
+					{
+						const variableType : Type = injectors[variable];
+						if(variableType.qname.toString() == base.qname.toString())
+						{
+							// This wanting a reference to it's self.
+							const self : QualifiedName = buildPropName(ns, variable);
+							instructions.push(
+								[Instructions.GetLocal_0],
+								[Instructions.GetLocal_0],
+								[Instructions.SetSuper, self]
+							);
+							
+							injectors[variable] = null;
+							delete injectors[variable];
+						}
+						else
+						{
+							throw new IllegalOperationError('Unable to inject type (' + 
+											variableType.name +	') into variable (' + variable + ')');
+						}
+					}
+					else if(injectors[variable] is IMixinBinding)
+					{
+						const binding : IMixinBinding = injectors[variable];
+						const descriptor : Class = binding.key;
+						const implementation : Class = binding.value;
+						
+						const bindingDescriptorType : Type = Type.getType(descriptor);
+						
+						const variablePropName : QualifiedName = buildProxyPropName(ns, 
+																				bindingDescriptorType);
+						if(null != dynamicClass.getField(variablePropName.name, ''))
+						{
+							const variableQName : QualifiedName = buildPropName(ns, variable);
+							
+							instructions.push(
+								[Instructions.GetLocal_0],
+								[Instructions.GetLocal_0],
+								[Instructions.GetProperty, variablePropName],
+								[Instructions.SetSuper, variableQName]
+							);
+							
+							injectors[variable] = null;
+							delete injectors[variable];
+						}
+						else
+						{
+							throw new IllegalOperationError('Unable to inject type (' + 
+											variableType.name +	') into variable (' + variable + ')');
+						}
+					}
+					else
+					{
+						throw new IllegalOperationError('Unable to inject type (' + 
+											variableType.name +	') into variable (' + variable + ')');
+					}
+				}
+				
 				const methodNames : Dictionary = getMethods(superType);
 				const initMethod : MethodInfo = methodNames["__init__"];
 				if(null != initMethod)
@@ -359,8 +360,11 @@ package org.osflash.mixins.generator
 			// TODO : sanity check the property name
 			return new QualifiedName(ns, propertyName);
 		}
-				
-		private function getMethods(superType : Type) : Dictionary
+			
+		/**
+		 * @private
+		 */		
+		protected function getMethods(superType : Type) : Dictionary
 		{
 			const methodNames : Dictionary = new Dictionary();
 			if(null == superType) return methodNames;
@@ -376,8 +380,11 @@ package org.osflash.mixins.generator
 			
 			return methodNames;
 		}
-				
-		private function getProperties(superType : Type) : Dictionary
+		
+		/**
+		 * @private
+		 */		
+		protected function getProperties(superType : Type) : Dictionary
 		{
 			const propertyNames : Dictionary = new Dictionary();
 			if(null == superType) return propertyNames;
@@ -397,7 +404,7 @@ package org.osflash.mixins.generator
 		/**
 		 * @private
 		 */
-		private function addInterfaceMembers(dynamicClass : DynamicClass, superType : Type) : void
+		protected function addInterfaceMembers(dynamicClass : DynamicClass, superType : Type) : void
 		{
 			const definitions : Array = dynamicClass.getInterfaces();
 			
@@ -572,7 +579,7 @@ package org.osflash.mixins.generator
 		/**
 		 * @private
 		 */
-		private function addMetaData(dynamicClass : DynamicClass, qname : QualifiedName) : void
+		protected function addMetaData(dynamicClass : DynamicClass, qname : QualifiedName) : void
 		{
 			const parameters : Dictionary = new Dictionary();
 			parameters['extraClass'] = qname.toString();
