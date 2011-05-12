@@ -34,7 +34,7 @@ package org.osflash.mixins
 			mixin = null;
 		}
 		
-		[Test]
+		[Tester]
 		public function create_signal_mixin_and_verify_creation() : void
 		{
 			mixin.add(ISignal, Signal);
@@ -79,7 +79,7 @@ package org.osflash.mixins
 				assertEquals('Valid int argument', 5678, i);
 			}, 1000));
 			
-			MixinSignalImpl(impl).dispatch2("1234", 5678);
+			impl.dispatch("1234", 5678);
 		}
 		
 		private function failIfCalled(mixin : IMixin, mixinError : MixinError) : void

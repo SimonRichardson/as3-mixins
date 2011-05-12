@@ -399,7 +399,6 @@ package org.osflash.mixins.generator
 				const propertyNames : Dictionary = getProperties(superType);
 			}
 			
-			
 			var i : int;
 			var total : int;
 			for each(var definition : Type in definitions)
@@ -425,6 +424,30 @@ package org.osflash.mixins.generator
 						const overrideMethod : Boolean = isObject 
 															? false 
 															: (null != methodNames[method.name]);
+						
+						if(overrideMethod)
+						{
+							var ignoreMethod : Boolean = false;
+							
+							const superMethod : MethodInfo = methodNames[method.name];
+							const superMethodMetaData : Array = superMethod.metadata;
+							const numMetadata : int = superMethodMetaData.length;
+							for(var j : int = 0; j<numMetadata; j++)
+							{
+								const metadata : MetadataInfo = superMethodMetaData[j];
+								if(metadata.name == 'Override')
+								{
+									// TODO : work out which override to use (calling super, or not)
+									ignoreMethod = true;
+									break;
+								}
+							}
+							
+							// We've got some meta data here that tell us that the super method
+							// want's to have priority over the bytecode injection. If this 
+							// happens we want to not generate the method at hand.
+							if(ignoreMethod) continue;
+						}
 						
 						const classMethod : MethodInfo = new MethodInfo(	dynamicClass, 
 																			method.name, 

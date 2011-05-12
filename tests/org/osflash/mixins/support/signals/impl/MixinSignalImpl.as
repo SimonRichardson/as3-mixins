@@ -10,7 +10,8 @@ package org.osflash.mixins.support.signals.impl
 		[Inject]
 		public var signal : ISignal;
 		
-		public function dispatch2(...args) : void
+		[Override]
+		public function dispatch(...args) : void
 		{
 			signal.dispatch.apply(null, args); 
 		}

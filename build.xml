@@ -65,7 +65,7 @@
 			
 			<arg value="-optimize=true"/>
 						
-			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject,Frame"/>
+			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject,Override,Frame"/>
 		</java>
 		
 		<exec executable="open" os="Mac OS X">
@@ -105,7 +105,7 @@
 			
 			<arg value="-verbose-stacktraces=true"/>
 			<arg value="-headless-server=true"/>
-			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject,Frame"/>
+			<arg value="-keep-as3-metadata+=Test,Suite,Before,BeforeClass,After,AfterClass,RunWith,Ignore,Inject,Override,Frame"/>
 		</java>
 		
 		<!-- Execute test runner SWF and publish reports -->
