@@ -451,6 +451,8 @@ package org.osflash.mixins
 													superClass : Class
 													) : Dictionary
 		{
+			
+			// TODO : use the new flemit metadata... from Type.methodInfo.metadata
 			const injectors : Dictionary = new Dictionary(true);
 			if(superType.name != "Object")
 			{

@@ -121,6 +121,35 @@ package org.osflash.mixins.generator
 				instructions.push([Instructions.GetLocal, i + 1]);
 			}
 			
+			// initialise the mixins here.
+			const ns : BCNamespace = new BCNamespace('', NamespaceKind.PACKAGE_NAMESPACE);
+			
+			for(var key : Object in mixins)
+			{
+				const descriptorType : Type = Type(key);
+				if(!descriptorType.isInterface) throw new IllegalOperationError('Descriptor (' +
+										descriptorType.name + ') should be a type of Interface.');
+											
+				const descriptorTypeName : QualifiedName = buildProxyPropName(	ns, 
+																				descriptorType
+																				);
+				const impl : Class = mixins[key];
+				
+				const implType : Type = Type.getType(impl);
+				
+				instructions.push([Instructions.GetLocal_0]);
+				instructions.push([Instructions.FindPropertyStrict, implType.qname]);
+				
+				// work out here if we need to push the mixin.
+				const paramCount : int = implType.constructor.parameters.length;
+				if(paramCount == 1) instructions.push([Instructions.GetLocal_0]);
+				if(paramCount > 1) throw new IllegalOperationError('More than one constructor ' +
+											'argument is not supported (' + implType.name + ').');
+				
+				instructions.push([Instructions.ConstructProp, implType.qname, paramCount]);
+				instructions.push([Instructions.SetProperty, descriptorTypeName]);
+			}
+			
 			// create the __init__ method 
 			const initMethod : MethodInfo = generateInitMethod(	dynamicClass, 
 																mixins, 
@@ -194,25 +223,6 @@ package org.osflash.mixins.generator
 				const descriptorType : Type = Type(key);
 				if(!descriptorType.isInterface) throw new IllegalOperationError('Descriptor (' +
 										descriptorType.name + ') should be a type of Interface.');
-											
-				const descriptorTypeName : QualifiedName = buildProxyPropName(	ns, 
-																				descriptorType
-																				);
-				const impl : Class = mixins[key];
-				
-				const implType : Type = Type.getType(impl);
-				
-				instructions.push([Instructions.GetLocal_0]);
-				instructions.push([Instructions.FindPropertyStrict, implType.qname]);
-				
-				// work out here if we need to push the mixin.
-				const paramCount : int = implType.constructor.parameters.length;
-				if(paramCount == 1) instructions.push([Instructions.GetLocal_0]);
-				if(paramCount > 1) throw new IllegalOperationError('More than one constructor ' +
-											'argument is not supported (' + implType.name + ').');
-				
-				instructions.push([Instructions.ConstructProp, implType.qname, paramCount]);
-				instructions.push([Instructions.SetProperty, descriptorTypeName]);
 				
 				properties = descriptorType.getProperties();
 				total = properties.length;
