@@ -1,12 +1,6 @@
 package org.osflash.mixins
 {
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.system.System;
-	import flash.text.TextField;
-	import flash.text.TextFieldAutoSize;
-	import flash.text.TextFormat;
-	import flash.utils.getTimer;
+	import org.flemit.reflection.Type;
 	import org.osflash.mixins.generator.signals.IMixinLoaderSignals;
 	import org.osflash.mixins.support.shape.ISquare;
 	import org.osflash.mixins.support.shape.defs.IName;
@@ -15,6 +9,14 @@ package org.osflash.mixins
 	import org.osflash.mixins.support.shape.impl.NameImpl;
 	import org.osflash.mixins.support.shape.impl.PositionImpl;
 	import org.osflash.mixins.support.shape.impl.SizeImpl;
+
+	import flash.display.Sprite;
+	import flash.events.Event;
+	import flash.system.System;
+	import flash.text.TextField;
+	import flash.text.TextFieldAutoSize;
+	import flash.text.TextFormat;
+	import flash.utils.getTimer;
 
 
 	[SWF(width=800, height=600, frameRate=64, backgroundColor=0x333333)]
@@ -64,7 +66,7 @@ package org.osflash.mixins
 			
 			var n: int = 10;
 			var m0: int = getTimer();
-			while(--n != 0) 
+			while(--n > -1) 
 			{
 				const mixin : IMixin = new Mixin();
 				mixin.add(IPosition, PositionImpl);
@@ -77,7 +79,11 @@ package org.osflash.mixins
 				signal.completedSignal.add(handleCreatedMixinSignal);
 				
 				mixin.removeAll();
+				signal.dispose();
 			}
+			
+			// Extreme clean up
+			Type.clearCache();
 			
 			var dt: int = (getTimer() - m0);
 			if(dt < _min) _min = dt;

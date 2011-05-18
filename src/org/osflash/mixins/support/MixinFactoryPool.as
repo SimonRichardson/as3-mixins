@@ -29,11 +29,6 @@ package org.osflash.mixins.support
 		 * @private 
 		 */
 		private var _arguments : Array;
-
-		/**
-		 * @private
-		 */
-		private var _pool : Array;
 		
 		/**
 		 * @private 
@@ -45,6 +40,16 @@ package org.osflash.mixins.support
 		 */
 		private var _size : int;
 		
+		/**
+		 * @private
+		 */
+		private var _activeSize : int;
+
+		/**
+		 * @private
+		 */
+		private const _pool : Vector.<MixinFactoryPoolNode> = new Vector.<MixinFactoryPoolNode>();
+		
 		public function MixinFactoryPool(	mixin : IMixin,
 											definitive : Class,
 											defaultArguments : Object = null
@@ -52,13 +57,13 @@ package org.osflash.mixins.support
 		{
 			_mixin = mixin;
 			
-			_pool = [];
 			_arguments = [];
 			
 			this.definitive = definitive;
 			this.defaultArguments = defaultArguments;
 			
 			_size = 0;
+			_activeSize = 0;
 			_poolGrowSize = POOL_GROWTH_SIZE;
 			
 			grow();
@@ -69,19 +74,45 @@ package org.osflash.mixins.support
 		 */
 		public function pop() : Object
 		{
-			if(_pool.length == 0)
+			if(_activeSize == 0)
 			{
 				grow();
 			}
 			
-			const object : Object = _pool.pop();
+			var exhausted : Boolean = true;
+			var node : MixinFactoryPoolNode;
+			var index : int = _pool.length;
+			while(--index > -1)
+			{
+				node = _pool[index];
+				if(!node.active)
+				{
+					exhausted = false;
+					break;
+				}
+			}
+			
+			if(exhausted) throw MixinFactoryPoolError.POOL_EXHAUSTED;
+			if(null == node) throw new IllegalOperationError('Unable to locate a node for use.');
+			
+			node.active = true;
+			
+			const object : Object = node.mixin;
 			if(object.hasOwnProperty('__init__'))
 			{
 				// magic method
 				const init : Function = object['__init__'];
-				if(_arguments.length == 0) init();
+				const total : int = _arguments.length;
+				
+				// Hot pathing.
+				if(total == 0) init();
+				if(total == 1) init(_arguments[0]);
+				if(total == 2) init(_arguments[0], _arguments[1]);
+				if(total == 3) init(_arguments[0], _arguments[1], _arguments[2]);
 				else init.apply(null, _arguments);
 			}
+			
+			_activeSize--;
 			
 			return object;
 		}
@@ -93,12 +124,24 @@ package org.osflash.mixins.support
 		 */
 		public function push(value : Object) : void
 		{
-			const index : int = _pool.indexOf(value);
-			if(index >= 0) throw new ArgumentError('Given Mixin implementation already exists in ' +
-																					'the pool.');
-			if(!(value is _definitive)) throw new ArgumentError('Given Mixin does not extend' +
+			if(null == value) throw new ArgumentError('Given mixin instance can not be null.');
+			if(!(value is _definitive)) throw new ArgumentError('Given mixin does not extend' +
 											' the correct definitive class (' + _definitive + ')');
-			_pool.push(value);
+			
+			var index : int = _pool.length;
+			while(--index > -1)
+			{
+				const node : MixinFactoryPoolNode = _pool[index];
+				if(node.mixin == value)
+				{
+					if(!node.active) throw new ArgumentError('Given mixin instance already ' +
+													'in the pool. You can not added it again.');
+					node.active = false;
+					break;
+				}
+			}
+			
+			_activeSize++;
 		}
 		
 		/**
@@ -111,8 +154,13 @@ package org.osflash.mixins.support
 				var index : int = poolGrowSize;
 				while(--index > -1)
 				{
-					_pool.push(_mixin.create(_definitive, _defaultArguments));
+					const mixin : Object = _mixin.create(_definitive, _defaultArguments);
+					const node : MixinFactoryPoolNode = new MixinFactoryPoolNode(mixin);
+					
+					_pool.push(node);
+					
 					_size++;
+					_activeSize++;
 				}
 			}
 			catch(error : Error)
@@ -129,7 +177,18 @@ package org.osflash.mixins.support
 		/**
 		 * Get the current size of the pool.
 		 */
-		public function get poolSize() : int { return _pool.length; }
+		public function get poolSize() : int 
+		{ 
+			var size : int = 0;
+			var index : int = _pool.length;
+			while(--index > -1)
+			{
+				const node : MixinFactoryPoolNode = _pool[index];
+				if(!node.active)
+					size++;
+			}
+			return size;
+		}
 		
 		/**
 		 * Get the default growth size of the pool. This is so you can make more out when the pool 
@@ -166,11 +225,15 @@ package org.osflash.mixins.support
 			
 			_definitive = value;
 			
-			const total : int = _pool.length;
-			for(var i : int = 0; i<total; i++)
+			var index : int = _pool.length;
+			while(--index > -1)
 			{
-				if(!(value is _definitive)) throw new ArgumentError('Given Mixin does not extend' +
-											' the correct definitive class (' + _definitive + ')');
+				const node : MixinFactoryPoolNode = _pool[index];
+				if(!(node.mixin is _definitive)) 
+				{
+					throw new ArgumentError('Given Mixin does not extend the correct definitive ' + 
+																	'class (' + _definitive + ')');
+				}
 			}
 		}
 	}

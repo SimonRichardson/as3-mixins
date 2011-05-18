@@ -60,6 +60,11 @@ package org.osflash.mixins
 		 * @private
 		 */
 		protected const mixinLoader : IMixinLoader = new MixinLoader();
+		
+		/**
+		 * @private
+		 */
+		protected const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
 					
 		/**
 		 * Empty constructor
@@ -272,6 +277,7 @@ package org.osflash.mixins
 				
 			mixinGenerator.dispose();
 			mixinLoader.dispose();
+			layoutBuilder.dispose();
 		}
 		
 		/**
@@ -407,9 +413,6 @@ package org.osflash.mixins
 				throw new IllegalOperationError('No definition classes were defined. Use ' +
 												'define() to create mixins.');
 			}
-			
-			// Create a new layout builder
-			const layoutBuilder : IByteCodeLayoutBuilder = new ByteCodeLayoutBuilder();
 						
 			// go through the classes to prepare and start to register them
 			var definitionsToProcess : MixinBindingList = definitions;

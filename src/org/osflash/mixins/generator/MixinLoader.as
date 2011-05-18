@@ -152,7 +152,7 @@ package org.osflash.mixins.generator
 						new EndTag()
 						);
 			
-			// _writer.compress = true;	
+			_writer.compress = true;	
 			_writer.write(_buffer, _header, tags);
 			
 			_buffer.position = 0;
@@ -168,6 +168,8 @@ package org.osflash.mixins.generator
 			
 			_buffer.position = 0;
 			_buffer.length = 0;
+			
+			tags.length = 0;
 			
 			if(total == 1)
 				return new SingleMixinLoaderSignals(_mixins[0], this);
@@ -208,6 +210,7 @@ package org.osflash.mixins.generator
 					const layout : IByteCodeLayout = _layouts.pop();
 					layout.dispose();
 				}
+				_layouts.length = 0;
 			}
 			
 			try
