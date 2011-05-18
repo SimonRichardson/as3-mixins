@@ -260,6 +260,18 @@ package org.osflash.mixins
 		}
 		
 		/**
+		 * @inheritDoc
+		 */
+		public function dispose() : void
+		{
+			removeAll();
+			
+			mixinGenerator.dispose();
+			mixinLoader.dispose();
+			layoutBuilder.dispose();
+		}
+		
+		/**
 		 * @private
 		 */
 		protected function cleanup() : void
@@ -274,10 +286,6 @@ package org.osflash.mixins
 				
 			for(key in dynamicClasses)
 				delete dynamicClasses[key];
-				
-			mixinGenerator.dispose();
-			mixinLoader.dispose();
-			layoutBuilder.dispose();
 		}
 		
 		/**

@@ -66,6 +66,11 @@ package org.osflash.mixins
 		function removeAll() : void;
 		
 		/**
+		 * Dispose a mixin, which will no longer be used.
+		 */
+		function dispose() : void;
+		
+		/**
 		 * Call to build the bytecode layout.
 		 */
 		function buildByteCodeLayout() : IByteCodeLayout;
