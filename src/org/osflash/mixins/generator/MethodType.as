@@ -3,7 +3,7 @@ package org.osflash.mixins.generator
 	/**
 	 * @author Simon Richardson - me@simonrichardson.info
 	 */
-	internal final class MethodType
+	public final class MethodType
 	{
 
 		public static const CONSTRUCTOR : int = 0;

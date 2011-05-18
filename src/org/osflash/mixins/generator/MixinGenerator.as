@@ -8,15 +8,18 @@ package org.osflash.mixins.generator
 	import org.flemit.bytecode.NamespaceKind;
 	import org.flemit.bytecode.NamespaceSet;
 	import org.flemit.bytecode.QualifiedName;
-	import org.flemit.reflection.FieldInfo;
 	import org.flemit.reflection.MemberVisibility;
-	import org.flemit.reflection.MetadataInfo;
 	import org.flemit.reflection.MethodInfo;
 	import org.flemit.reflection.ParameterInfo;
 	import org.flemit.reflection.PropertyInfo;
 	import org.flemit.reflection.Type;
 	import org.osflash.mixins.IMixinBinding;
-	import org.osflash.mixins.MixinError;
+	import org.osflash.mixins.generator.generators.MixinClassMetadataGenerator;
+	import org.osflash.mixins.generator.generators.MixinConstructorGenerator;
+	import org.osflash.mixins.generator.generators.MixinInterfaceGenerator;
+	import org.osflash.mixins.generator.generators.buildMixinPropertyName;
+	import org.osflash.mixins.generator.generators.buildMixinProxyPropertyName;
+	import org.osflash.mixins.generator.generators.getMixinTypeMethods;
 
 	import flash.errors.IllegalOperationError;
 	import flash.utils.Dictionary;
@@ -25,7 +28,21 @@ package org.osflash.mixins.generator
 	 */
 	public class MixinGenerator
 	{
+		
+		protected var interfaceGenerator : MixinInterfaceGenerator;
+		
+		protected var constructorGenerator : MixinConstructorGenerator;
+		
+		protected var classMetadataGenerator : MixinClassMetadataGenerator;
+		
+		public function MixinGenerator()
+		{
+			interfaceGenerator = new MixinInterfaceGenerator();
+			constructorGenerator = new MixinConstructorGenerator();
+			classMetadataGenerator = new MixinClassMetadataGenerator();
+		}
 
+		
 		public function generate(	name : QualifiedName, 
 									base : Type,
 									superType : Type,
@@ -36,10 +53,13 @@ package org.osflash.mixins.generator
 			const interfaces : Array = [base].concat(base.getInterfaces());			
 			const dynamicClass : DynamicClass = new DynamicClass(name, superType, interfaces);
 			
-			addInterfaceMembers(dynamicClass, superType);
-			addMetaData(dynamicClass, name);
-									
-			dynamicClass.constructor = createConstructor(dynamicClass);
+			interfaceGenerator.superType = superType;
+			interfaceGenerator.generator(dynamicClass);
+			
+			classMetadataGenerator.qname = name;
+			classMetadataGenerator.generator(dynamicClass);
+						
+			constructorGenerator.generator(dynamicClass);
 			
 			dynamicClass.addMethodBody(	dynamicClass.scriptInitialiser, 
 										generateScriptInitialiser(dynamicClass)
@@ -65,33 +85,6 @@ package org.osflash.mixins.generator
 		public function dispose() : void
 		{
 			
-		}
-		
-		/**
-		 * @private
-		 */
-		protected function createConstructor(dynamicClass : DynamicClass) : MethodInfo
-		{
-			const params:Array = [];
-						
-			const properties : Array = dynamicClass.getProperties();
-			const total : int = properties.length;
-			for (var i : int = 0; i < total; i++) 
-			{
-				const propertyInfo : PropertyInfo = properties[i];
-				if(!propertyInfo.canWrite) continue;
-				params.push(new ParameterInfo(propertyInfo.name, propertyInfo.type, true));
-			}
-			
-			return new MethodInfo(	dynamicClass, 
-									"ctor", 
-									null, 
-									MemberVisibility.PUBLIC, 
-									false, 
-									false, 
-									Type.star, 
-									params
-								);
 		}
 		
 		/**
@@ -130,7 +123,8 @@ package org.osflash.mixins.generator
 				if(!descriptorType.isInterface) throw new IllegalOperationError('Descriptor (' +
 										descriptorType.name + ') should be a type of Interface.');
 											
-				const descriptorTypeName : QualifiedName = buildProxyPropName(	ns, 
+				const descriptorTypeName : QualifiedName = buildMixinProxyPropertyName(	
+																				ns, 
 																				descriptorType
 																				);
 				const impl : Class = mixins[key];
@@ -233,9 +227,10 @@ package org.osflash.mixins.generator
 					
 					local++;
 					
-					const propertyTypeName : QualifiedName = buildPropName( ns,
-																			propertyInfo.name
-																			);
+					const propertyTypeName : QualifiedName = buildMixinPropertyName( 
+																				ns,
+																				propertyInfo.name
+																				);
 					
 					instructions.push([Instructions.GetLocal_0]);
 					instructions.push([Instructions.GetLocal, local]);
@@ -257,7 +252,7 @@ package org.osflash.mixins.generator
 						if(variableType.qname.toString() == base.qname.toString())
 						{
 							// This wanting a reference to it's self.
-							const self : QualifiedName = buildPropName(ns, variable);
+							const self : QualifiedName = buildMixinPropertyName(ns, variable);
 							instructions.push(
 								[Instructions.GetLocal_0],
 								[Instructions.GetLocal_0],
@@ -270,7 +265,7 @@ package org.osflash.mixins.generator
 						else
 						{
 							throw new IllegalOperationError('Unable to inject type (' + 
-											variableType.name +	') into variable (' + variable + ')');
+										variableType.name +	') into variable (' + variable + ')');
 						}
 					}
 					else if(injectors[variable] is IMixinBinding)
@@ -281,11 +276,14 @@ package org.osflash.mixins.generator
 						
 						const bindingDescriptorType : Type = Type.getType(descriptor);
 						
-						const variablePropName : QualifiedName = buildProxyPropName(ns, 
-																				bindingDescriptorType);
+						const variablePropName : QualifiedName = buildMixinProxyPropertyName(
+																			ns, 
+																			bindingDescriptorType);
 						if(null != dynamicClass.getField(variablePropName.name, ''))
 						{
-							const variableQName : QualifiedName = buildPropName(ns, variable);
+							const variableQName : QualifiedName = buildMixinPropertyName( ns, 
+																						  variable
+																						  );
 							
 							instructions.push(
 								[Instructions.GetLocal_0],
@@ -300,17 +298,17 @@ package org.osflash.mixins.generator
 						else
 						{
 							throw new IllegalOperationError('Unable to inject type (' + 
-											variableType.name +	') into variable (' + variable + ')');
+										variableType.name +	') into variable (' + variable + ')');
 						}
 					}
 					else
 					{
 						throw new IllegalOperationError('Unable to inject type (' + 
-											variableType.name +	') into variable (' + variable + ')');
+										variableType.name +	') into variable (' + variable + ')');
 					}
 				}
 				
-				const methodNames : Dictionary = getMethods(superType);
+				const methodNames : Dictionary = getMixinTypeMethods(superType);
 				const initMethod : MethodInfo = methodNames["__init__"];
 				if(null != initMethod)
 				{
@@ -337,313 +335,6 @@ package org.osflash.mixins.generator
 																	instructions
 																	));
 			return method;
-		}
-		
-		/**
-		 * @private
-		 */
-		protected function buildProxyPropName(	ns : BCNamespace, 
-												interfaceType : Type
-												) : QualifiedName
-		{
-			const name : String = '_' +interfaceType.fullName.replace(/[\. : ]/g, '_');
-			return new QualifiedName(ns, name);
-		}
-		
-		/**
-		 * @private
-		 */
-		protected function buildPropName(	ns : BCNamespace,
-											propertyName : String
-											) : QualifiedName
-		{
-			// TODO : sanity check the property name
-			return new QualifiedName(ns, propertyName);
-		}
-			
-		/**
-		 * @private
-		 */		
-		protected function getMethods(superType : Type) : Dictionary
-		{
-			const methodNames : Dictionary = new Dictionary();
-			if(null == superType) return methodNames;
-			
-			const methods : Array = superType.getMethods(false, true, true);
-			const total : int = methods.length;
-			for(var i : int = 0; i<total; i++)
-			{
-				const method : MethodInfo = methods[i];
-				const methodName : String = method.name;
-				methodNames[methodName] = method;
-			}
-			
-			return methodNames;
-		}
-		
-		/**
-		 * @private
-		 */		
-		protected function getProperties(superType : Type) : Dictionary
-		{
-			const propertyNames : Dictionary = new Dictionary();
-			if(null == superType) return propertyNames;
-			
-			const properties : Array = superType.getProperties(false, true, true);
-			const total : int = properties.length;
-			for(var i : int = 0; i<total; i++)
-			{
-				const property : PropertyInfo = properties[i];
-				const propertyName : String = property.name;
-				propertyNames[propertyName] = property;
-			}
-			
-			return propertyNames;
-		}
-		
-		/**
-		 * @private
-		 */
-		protected function addInterfaceMembers(dynamicClass : DynamicClass, superType : Type) : void
-		{
-			const definitions : Array = dynamicClass.getInterfaces();
-			
-			const isObject : Boolean = superType.name == "Object";
-			
-			if(!isObject)
-			{
-				const methodNames : Dictionary = getMethods(superType);
-				const propertyNames : Dictionary = getProperties(superType);
-			}
-			
-			var i : int;
-			var total : int;
-			for each(var definition : Type in definitions)
-			{
-				const definitionInterfaces : Array = definition.getInterfaces();
-				total = definitionInterfaces.length;
-				for(i = 0; i<total; i++)
-				{
-					const extendedInterface : Type = definitionInterfaces[i];
-					if (definitions.indexOf(extendedInterface) == -1)
-					{
-						definitions.push(extendedInterface);
-					}
-				}
-				
-				const definitionMethods : Array = definition.getMethods();
-				total = definitionMethods.length;
-				for(i = 0; i<total; i++)
-				{
-					const method : MethodInfo = definitionMethods[i];
-					if(null == dynamicClass.getMethod(method.name))
-					{
-						const overrideMethod : Boolean = isObject 
-															? false 
-															: (null != methodNames[method.name]);
-						
-						if(overrideMethod)
-						{
-							var ignoreMethod : Boolean = false;
-							
-							const superMethod : MethodInfo = methodNames[method.name];
-							const superMethodMetaData : Array = superMethod.metadata;
-							const numMetadata : int = superMethodMetaData.length;
-							for(var j : int = 0; j<numMetadata; j++)
-							{
-								const metadata : MetadataInfo = superMethodMetaData[j];
-								if(metadata.name == 'Override')
-								{
-									// TODO : work out which override to use (calling super, or not)
-									ignoreMethod = true;
-									break;
-								}
-							}
-							
-							// We've got some meta data here that tell us that the super method
-							// want's to have priority over the bytecode injection. If this 
-							// happens we want to not generate the method at hand.
-							if(ignoreMethod) continue;
-						}
-						
-						const classMethod : MethodInfo = new MethodInfo(	dynamicClass, 
-																			method.name, 
-																			null, 
-																			method.visibility, 
-																			method.isStatic, 
-																			overrideMethod, 
-																			method.returnType, 
-																			method.parameters
-																			);
-						
-						const classMethodBody : DynamicMethod = generateMethod(	definition, 
-																				classMethod, 
-																				MethodType.METHOD
-																				);
-						
-						dynamicClass.addMethod(classMethod);
-						dynamicClass.addMethodBody(classMethod, classMethodBody);
-						
-						const methodNS : BCNamespace = new BCNamespace(	'', 
-																	NamespaceKind.PACKAGE_NAMESPACE
-																	);
-						const methodPropertyName : QualifiedName = buildProxyPropName(	methodNS, 
-																						definition
-																						);
-						if(!dynamicClass.getField(methodPropertyName.name, ''))
-						{
-							dynamicClass.addSlot(new FieldInfo(	dynamicClass, 
-																methodPropertyName.name, 
-																methodPropertyName.toString(), 
-																MemberVisibility.PUBLIC, 
-																false, 
-																definition
-																));
-						}
-					}
-					else
-					{
-						throw MixinError.METHOD_GENERATOR_ERROR;
-					}
-				}
-				
-				const definitionProperties : Array = definition.getProperties();
-				total = definitionProperties.length;
-				for(i = 0; i<total; i++)
-				{
-					const property : PropertyInfo = definitionProperties[i];
-					if(null == dynamicClass.getProperty(property.name))
-					{
-						const overrideProperty : Boolean = isObject
-														? false
-														: (null != propertyNames[property.name]);
-						
-						const classProperty : PropertyInfo = new PropertyInfo(	dynamicClass, 
-																				property.name, 
-																				null, 
-																				property.visibility, 
-																				property.isStatic, 
-																				overrideProperty, 
-																				property.type, 
-																				property.canRead, 
-																				property.canWrite
-																				);
-						dynamicClass.addProperty(classProperty);
-						
-						
-						const proxyNS : BCNamespace = new BCNamespace(	'', 
-																	NamespaceKind.PACKAGE_NAMESPACE
-																	);
-						const proxyPropertyName : QualifiedName = buildProxyPropName(	proxyNS, 
-																						definition
-																						);
-						
-						if(!dynamicClass.getField(proxyPropertyName.name, ''))
-						{
-							dynamicClass.addSlot(new FieldInfo(	dynamicClass, 
-																proxyPropertyName.name, 
-																proxyPropertyName.toString(), 
-																MemberVisibility.PUBLIC, 
-																false, 
-																definition
-																));
-						}
-						
-						if (property.canRead)
-						{
-							const getter : DynamicMethod = generateMethod(	definition, 
-																			classProperty.getMethod, 
-																			MethodType.PROPERTY_GET
-																			);
-							dynamicClass.addMethodBody(	classProperty.getMethod, getter);
-						}
-						
-						if (property.canWrite)
-						{
-							const setter : DynamicMethod = generateMethod(	definition, 
-																			classProperty.setMethod, 
-																			MethodType.PROPERTY_SET
-																			);
-							dynamicClass.addMethodBody(classProperty.setMethod, setter);
-						}
-						
-					}
-					else
-					{
-						throw MixinError.PROPERTY_GENERATOR_ERROR;
-					}
-				}
-			}
-		}
-		
-		/**
-		 * @private
-		 */
-		protected function addMetaData(dynamicClass : DynamicClass, qname : QualifiedName) : void
-		{
-			const parameters : Dictionary = new Dictionary();
-			parameters['extraClass'] = qname.toString();
-			
-			dynamicClass.addMetadata(new MetadataInfo('Frame', parameters));
-		}
-		
-		/**
-		 * @private
-		 */
-		protected function generateMethod(	type : Type, 
-											method : MethodInfo, 
-											methodType : uint
-											) : DynamicMethod
-		{
-			const argCount : uint = method.parameters.length;
-			const ns : BCNamespace = new BCNamespace('', NamespaceKind.PACKAGE_NAMESPACE);
-			const proxyPropertyName : QualifiedName = buildProxyPropName(ns, type);
-			
-			const instructions : Array = [	[Instructions.GetLocal_0],
-											[Instructions.PushScope],
-										    ];
-			
-			if (methodType == MethodType.METHOD)
-			{
-				instructions.push([Instructions.GetLex, proxyPropertyName]);
-				
-				for (var i : int=0; i < argCount; i++)
-				{
-					instructions.push([Instructions.GetLocal, i+1]);
-				}
-				
-				if (method.returnType == Type.voidType)
-					instructions.push([Instructions.CallPropVoid, method.qname, argCount]);
-				else
-					instructions.push([Instructions.CallProperty, method.qname, argCount]);
-				
-			}
-			else if (methodType == MethodType.PROPERTY_GET || methodType == MethodType.PROPERTY_SET)
-			{
-				const methodName : String = method.fullName.match(/(\w+)\/\w+$/)[1];
-				const methodQName : QualifiedName = new QualifiedName(ns, methodName); 
-				
-				if (methodType == MethodType.PROPERTY_SET)
-				{
-					instructions.push([Instructions.GetLocal_0]);
-					instructions.push([Instructions.GetLex, proxyPropertyName]);
-					instructions.push([Instructions.GetLocal_1]);
-					instructions.push([Instructions.SetProperty, methodQName]);
-				}
-				else
-				{
-					instructions.push([Instructions.GetLocal_0]);
-					instructions.push([Instructions.GetLex, proxyPropertyName]);
-					instructions.push([Instructions.GetProperty, methodQName]);
-				}
-			}
-			
-			if (method.returnType == Type.voidType) // void
-				instructions.push([Instructions.ReturnVoid]);
-			else
-				instructions.push([Instructions.ReturnValue]);
-			
-			return new DynamicMethod(method, 7 + argCount, argCount + 2, 4, 5, instructions);
 		}
 		
 		/**
