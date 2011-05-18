@@ -132,6 +132,7 @@ package org.osflash.mixins.support
 			while(--index > -1)
 			{
 				const node : MixinFactoryPoolNode = _pool[index];
+				if(null == node.mixin) throw MixinFactoryPoolError.MIXIN_NULL_ON_PUSH;
 				if(node.mixin == value)
 				{
 					if(!node.active) throw new ArgumentError('Given mixin instance already ' +
