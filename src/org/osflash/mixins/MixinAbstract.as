@@ -64,11 +64,26 @@ package org.osflash.mixins
 		 */
 		public function remove(descriptor : Class) : IMixinBinding
 		{
+			if(null == descriptor) throw new ArgumentError('Given descriptor can not be null');
 			const binding : IMixinBinding = bindings.find(descriptor);
 			if (!binding) return null;
 			
 			bindings = bindings.filterNot(descriptor);
 			return binding;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function undefine(implementation : Class) : IMixinNamedBinding
+		{
+			if(null == implementation) throw new ArgumentError('Given implementation can not ' + 
+																					'be null');
+			const binding : IMixinBinding = definitions.find(implementation);
+			if (!binding) return null;
+			
+			definitions = definitions.filterNot(implementation);
+			return IMixinNamedBinding(binding);
 		}
 		
 		/**
