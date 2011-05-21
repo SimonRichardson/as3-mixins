@@ -1,11 +1,12 @@
 package org.osflash.mixins.support
 {
-	import flash.errors.IllegalOperationError;
 	import org.osflash.mixins.IMixin;
+
+	import flash.errors.IllegalOperationError;
 	/**
 	 * @author Simon Richardson - simon@ustwo.co.uk
 	 */
-	public class MixinFactoryPool
+	public class MixinFactoryPool implements IMixinFactoryPool
 	{
 		
 		public static const POOL_GROWTH_SIZE : int = 8;
