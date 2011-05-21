@@ -1,5 +1,6 @@
 package org.osflash.mixins
 {
+	import org.osflash.mixins.support.shape.ICircle;
 	import asunit.framework.IAsync;
 
 	import org.osflash.mixins.support.shape.defs.IName;
@@ -30,21 +31,44 @@ package org.osflash.mixins
 		}
 		
 		[Test(expects="ArgumentError")]
-		public function test_descriptor_can_not_be_null() : void
+		public function descriptor_can_not_be_null_on_add() : void
 		{
 			mixin.add(null, NameImpl);
 		}
 		
 		[Test(expects="ArgumentError")]
-		public function test_implementation_can_not_be_null() : void
+		public function implementation_can_not_be_null_on_add() : void
 		{
 			mixin.add(IName, null);
 		}
 		
 		[Test(expects="ArgumentError")]
-		public function test_descriptor_and_implementation_can_not_be_null() : void
+		public function descriptor_and_implementation_can_not_be_null_on_add() : void
 		{
 			mixin.add(null, null);
+		}
+		
+		[Test(expects="ArgumentError")]
+		public function definition_can_not_be_null_on_define() : void
+		{
+			mixin.define(null);
+		}
+		
+		public function superClass_can_be_null_on_define() : void
+		{
+			mixin.define(ICircle, null);
+		}
+		
+		[Test(expects="ArgumentError")]
+		public function descriptor_can_not_be_null_on_remove() : void
+		{
+			mixin.remove(null);
+		}
+		
+		[Test(expects="ArgumentError")]
+		public function definition_can_not_be_null_on_undefine() : void
+		{
+			mixin.undefine(null);
 		}
 	}
 }
