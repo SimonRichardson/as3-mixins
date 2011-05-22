@@ -200,7 +200,8 @@ package org.osflash.mixins.support
 		public function set poolGrowSize(value : int) : void 
 		{
 			if(value < 1) throw new ArgumentError('Given value can not be less than 1');
-			_poolGrowSize = value; 
+			_poolGrowSize = value;
+			grow();
 		}
 		
 		/**

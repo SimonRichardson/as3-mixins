@@ -51,7 +51,7 @@ package org.osflash.mixins.support.debug
 				const poolSize : int = factory.poolSize;
 				const poolGrowSize : int = factory.poolGrowSize;
 				
-				const health : int = size / poolSize * 100;
+				const health : int = (poolSize / size) * 100;
 				const percentage : String = health + '%';
 				
 				const pool : XML = <pool 	name={poolName} 
