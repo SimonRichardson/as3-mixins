@@ -141,9 +141,9 @@ package org.osflash.mixins
 				
 				// Work out if we're correct.
 				if(argsLength == 0 && constructorArgCount > 0)
-					throw MixinError.ARGUMENTS_ARE_REQURIED;
+					MixinError.throwError(MixinError.ARGUMENTS_ARE_REQURIED);
 				else if(argsLength < constructorArgCount)
-					throw MixinError.CONSTRUCTOR_ARGUMENT_MISMATCH;
+					MixinError.throwError(MixinError.CONSTRUCTOR_ARGUMENT_MISMATCH);
 				else
 				{
 					argumentValues = [];

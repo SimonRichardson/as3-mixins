@@ -131,7 +131,7 @@ package org.osflash.mixins.generator.generators
 					}
 					else
 					{
-						throw MixinError.METHOD_GENERATOR_ERROR;
+						MixinError.throwError(MixinError.METHOD_GENERATOR_ERROR);
 					}
 				}
 				
@@ -201,7 +201,7 @@ package org.osflash.mixins.generator.generators
 					}
 					else
 					{
-						throw MixinError.PROPERTY_GENERATOR_ERROR;
+						MixinError.throwError(MixinError.PROPERTY_GENERATOR_ERROR);
 					}
 				}
 			}

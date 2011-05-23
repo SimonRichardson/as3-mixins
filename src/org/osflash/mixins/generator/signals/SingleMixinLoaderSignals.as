@@ -34,7 +34,7 @@ package org.osflash.mixins.generator.signals
 		/**
 		 * @private
 		 */
-		private const _errorSignal : ISignal = new Signal(IMixin, MixinError);
+		private const _errorSignal : ISignal = new Signal(IMixin, int);
 		
 		/**
 		 * @private
