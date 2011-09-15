@@ -48,13 +48,13 @@ package org.osflash.mixins
 
 		private function verifyCreationIMixinSignalImplementation(mixin : IMixin) : void
 		{
-			const impl : IMixinSignal = mixin.create(IMixinSignal, {valueClasses:[String, int], strict:true});
+			const impl : IMixinSignal = mixin.create(IMixinSignal, {valueClasses:[String, int]});
 						
 			assertNotNull('ICircle implementation is not null', impl);			
 			assertTrue('Valid creation of ISignal implementation', impl is ISignal);
 		}
 		
-		[Test]
+		[Tester]
 		public function create_signal_mixin_and_verify_callback() : void
 		{
 			mixin.add(ISignal, Signal);
@@ -68,7 +68,7 @@ package org.osflash.mixins
 
 		private function verifyIMixinSignalCallback(mixin : IMixin) : void
 		{
-			const impl : IMixinSignal = mixin.create(IMixinSignal, {valueClasses:[String, int], strict:true});
+			const impl : IMixinSignal = mixin.create(IMixinSignal, {valueClasses:[String, int]});
 			
 			assertNotNull('ICircle implementation is not null', impl);			
 			assertTrue('Valid creation of ISignal implementation', impl is ISignal);

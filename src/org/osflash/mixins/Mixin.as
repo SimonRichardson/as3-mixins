@@ -261,11 +261,6 @@ package org.osflash.mixins
 				{
 					mixins[type] = binding.value;
 				}
-				else
-				{
-					throw new MixinError('Interface ' + type.name + ' defined on ' + base.name + 
-																		' has not been defined'); 
-				}
 			}
 						
 			return mixinGenerator.generate(name, base, superType, mixins, injectors);
